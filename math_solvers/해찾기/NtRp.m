@@ -1,0 +1,17 @@
+function [root,er]=NtRp(F,xi,es,maxit)
+dx=es/1000;
+X=xi;
+E = es*2;
+iter=0;
+while E >= es
+    iter=iter+1;
+    Xold = X;
+    df=(F(xi+dx)-F(xi))/dx;
+    X=xi-F(xi)/df;
+    xi=X;
+    E = abs((X-Xold)/X*100);
+    root(iter)=X;
+    er(iter)=E;
+    if iter>=maxit break; end
+end
+end

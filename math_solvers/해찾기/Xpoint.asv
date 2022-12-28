@@ -1,0 +1,12 @@
+function [root,er] = Xpoint(func,xr,es,maxit)
+iter = 0;
+while (iter < maxit)
+    iter = iter+1;
+    xold = xr;
+    xr=func(xr);
+    ea=abs((xr - xrold)/xr)*100;
+    if ea <= es | iter >= maxit,break,end
+    root[iter] = xr; 
+    er[iter]
+end
+end

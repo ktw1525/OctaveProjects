@@ -1,0 +1,37 @@
+function [root,ea,iter]=fposition(func,xl,xu,es,maxit,varargin)
+% fposition : func = 0 이 되는 근을 찾아간다.
+%   [root,ea,iter]=fposition(func,xl,xu,es,maxit,p1,p2,....) :
+%       가위치법을 사용해서 근을 찾는다.
+% Input :
+%   func = 대상 함수
+%   xl, xu = 근이 있을거라 추측되는 구간
+%   es = 최대 상대오차, es보다 오차율이 적도록 반복한다.
+%       (default = 0.0001%)
+%   maxit = 최대허용 반복수행 개수
+%   p1,p2,... = 함수의 다른 변수들의 값
+% Output :
+%   root = 추정근
+%   ea = 대략적인 상대오차(%)
+%   iter = 반복수행 개수
+if nargin<3, error('at least 3 input arguments required'), end
+test = func(xl,varargin{:})*func(xu,varargin{:});
+if test>0, error('no sign change'), end
+if nargin<4|isempty(es), es = 0.0001;end
+if nargin<5|isempty(maxit), maxit = 50;end
+iter = 0; xr = xl;
+while (1)
+    xrold = xr;
+    xr = xu - func(xu,varargin{:})*(xl-xu)/(func(xl,varargin{:})-func(xu,varargin{:}));
+    iter = iter + 1;
+    if xr ~= 0, ea=abs((xr - xrold)/xr)*100; end
+    test = func(xl,varargin{:})*func(xr,varargin{:});
+    if test < 0
+        xu = xr;
+    elseif test > 0
+        xl = xr;
+    else
+        ea = 0;
+    end
+    if ea <= es | iter >= maxit,break,end
+end
+root = xr;
