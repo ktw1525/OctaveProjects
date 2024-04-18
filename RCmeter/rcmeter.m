@@ -11,17 +11,17 @@ n = linspace(1,Len,Len); # 샘플번호
 
 V = Vp*sin(w*n);         # 측정 전압
 dVdn = w*Vp*cos(w*n);
-Rtrue = (100+n)*100;         # R 참 값
+Gtrue = (0.01+n)*0.01;         # G 참 값
 Ctrue = (Len - n)*10^-6;     # C 참 값
 dCdn = -10^-6;
 
-I = V./Rtrue + dVdn.*Ctrue + dCdn.*V;   # 측정 전류
+I = V.*Gtrue + dVdn.*Ctrue + dCdn.*V;   # 측정 전류
 
 figure(1);
 subplot(2,1,1);
 plot(n,V,'r', n,I*10000, 'b');
 subplot(2,1,2);
-plot(n, Rtrue/10000, 'r', n, Ctrue*10000, 'b');
+plot(n, Gtrue*10000, 'r', n, Ctrue*10000, 'b');
 
 # 입력 데이터
 # 1) 전압 V, dVdn
@@ -46,10 +46,10 @@ Ik = @(k,ag,bg,ac,bc,v,i,dvdt) ( Gk(k,ag,bg) + dCk(k,ac,bc) )/v + Ck(k,ac,bc)*dv
 Mk = @(i) [ (i+0)*V(i+0) V(i+0) V(i+0)+(i+0)*dVdn(i+0) dVdn(i+0);
       (i+1)*V(i+1) V(i+1) V(i+1)+(i+1)*dVdn(i+1) dVdn(i+1);
       (i+2)*V(i+2) V(i+2) V(i+2)+(i+2)*dVdn(i+2) dVdn(i+2);
-      (i+3)*V(i+3) V(i+3) V(i+3)+(i+3)*dVdn(i+3) dVdn(i+3); ]
+      (i+3)*V(i+3) V(i+3) V(i+3)+(i+3)*dVdn(i+3) dVdn(i+3); ];
 bk = @(i) [ I(i); I(i+1); I(i+2); I(i+3); ];
 
 
-inv(Mk(2))*bk(2)
+inv(Mk(1))*bk(1)
 
 
