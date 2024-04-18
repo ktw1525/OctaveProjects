@@ -1,4 +1,7 @@
 function [P,Q,V,A,Ybus,EP,EQ]=powersys()
+%Octave Start
+pkg load io
+%Octave End
 clear all
 clc
 format long
