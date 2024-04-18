@@ -1,35 +1,35 @@
-function Ybus = Ygen(filename) %Ybus ¸ÞÆ®¸¯½º »ý¼º function
+function Ybus = Ygen(filename) %Ybus ë©”íŠ¸ë¦­ìŠ¤ ìƒì„± function
 RXB = xlsread(filename,2);
-M = size(RXB,1); % µ¥ÀÌÅ¸ ÁÙ ¼ö
-N = max(max(RXB(:,1:2))); % ¸ð¼± ÃÑ °³¼ö
-R=ones(N,N)*realmax; X=ones(N,N)*realmax; % ÀúÇ×, ¸®¾×ÅÏ½º ¸ÅÆ®¸¯½º ºó°ø°£ ¹«ÇÑ´ë·Î Ã¤¿ò
-B=zeros(N,N); G=zeros(N,N); % ¼­¼ÁÅÏ½º, ÄÁ´öÅÏ½º ¸ÞÆ®¸¯½º°¡ µÉ º¯¼ö ¼±¾ð
+M = size(RXB,1); % ë°ì´íƒ€ ì¤„ ìˆ˜
+N = max(max(RXB(:,1:2))); % ëª¨ì„  ì´ ê°œìˆ˜
+R=ones(N,N)*realmax; X=ones(N,N)*realmax; % ì €í•­, ë¦¬ì•¡í„´ìŠ¤ ë§¤íŠ¸ë¦­ìŠ¤ ë¹ˆê³µê°„ ë¬´í•œëŒ€ë¡œ ì±„ì›€
+B=zeros(N,N); G=zeros(N,N); % ì„œì…‰í„´ìŠ¤, ì»¨ë•í„´ìŠ¤ ë©”íŠ¸ë¦­ìŠ¤ê°€ ë  ë³€ìˆ˜ ì„ ì–¸
 for n = 1:M
-    if RXB(n,1)~=RXB(n,2) % ¹ö½º¿¡ º´·Ä·Î ¿¬°áµÈ ¸®¾×ÅÏ½º ÀÏ°æ¿ì ¸¸
-        R(RXB(n,1),RXB(n,2)) = RXB(n,3); % ÀúÇ× °ª ÀúÀå
-        R(RXB(n,2),RXB(n,1)) = RXB(n,3); % ´ëÄª Çà·Ä²Ã·Î ¸¸µë
-        X(RXB(n,1),RXB(n,2)) = RXB(n,4); % ¸®¾×ÅÏ½º °ª ÀúÀå
-        X(RXB(n,2),RXB(n,1)) = RXB(n,4); % ´ëÄª Çà·Ä²Ã·Î ¸¸µë
+    if RXB(n,1)~=RXB(n,2) % ë²„ìŠ¤ì— ë³‘ë ¬ë¡œ ì—°ê²°ëœ ë¦¬ì•¡í„´ìŠ¤ ì¼ê²½ìš° ë§Œ
+        R(RXB(n,1),RXB(n,2)) = RXB(n,3); % ì €í•­ ê°’ ì €ìž¥
+        R(RXB(n,2),RXB(n,1)) = RXB(n,3); % ëŒ€ì¹­ í–‰ë ¬ê¼´ë¡œ ë§Œë“¬
+        X(RXB(n,1),RXB(n,2)) = RXB(n,4); % ë¦¬ì•¡í„´ìŠ¤ ê°’ ì €ìž¥
+        X(RXB(n,2),RXB(n,1)) = RXB(n,4); % ëŒ€ì¹­ í–‰ë ¬ê¼´ë¡œ ë§Œë“¬
     end
-    B(RXB(n,1),RXB(n,2)) = RXB(n,5); % ¼­¼ÁÅÏ½º °ª ÀúÀå
-    G(RXB(n,1),RXB(n,2)) = RXB(n,6); % ÄÁ´öÅÏ½º °ª ÀúÀå
+    B(RXB(n,1),RXB(n,2)) = RXB(n,5); % ì„œì…‰í„´ìŠ¤ ê°’ ì €ìž¥
+    G(RXB(n,1),RXB(n,2)) = RXB(n,6); % ì»¨ë•í„´ìŠ¤ ê°’ ì €ìž¥
 end
-G = G + G.'; % ¼­¼ÁÅÏ½º°ª ´ëÄªÇà·Ä²Ã·Î, ´ë°¢¼ººÐÀº 2¹è
-B = B + B.'; % ÄÁ´öÅÏ½º°ª ´ëÄªÇà·Ä²Ã·Î, ´ë°¢¼ººÐÀº 2¹è
-Y = (R+X*i).^(-1) + (ones(N,1)*sum(B*i+G)/2.*eye(N)); % ¾îµå¹ÌÅÏ½º ¸ÅÆ®¸¯½º °è»ê
-Ybus = zeros(N,N); % Ybus »ý¼º ÁØºñ
-    for u=1:N % Ybus Çà¹øÈ£
-        for j=u:N % Ybus ¿­¹øÈ£
-            if (u==j) % ´ë°¢¼ººÐ
+G = G + G.'; % ì„œì…‰í„´ìŠ¤ê°’ ëŒ€ì¹­í–‰ë ¬ê¼´ë¡œ, ëŒ€ê°ì„±ë¶„ì€ 2ë°°
+B = B + B.'; % ì»¨ë•í„´ìŠ¤ê°’ ëŒ€ì¹­í–‰ë ¬ê¼´ë¡œ, ëŒ€ê°ì„±ë¶„ì€ 2ë°°
+Y = (R+X*i).^(-1) + (ones(N,1)*sum(B*i+G)/2.*eye(N)); % ì–´ë“œë¯¸í„´ìŠ¤ ë§¤íŠ¸ë¦­ìŠ¤ ê³„ì‚°
+Ybus = zeros(N,N); % Ybus ìƒì„± ì¤€ë¹„
+    for u=1:N % Ybus í–‰ë²ˆí˜¸
+        for j=u:N % Ybus ì—´ë²ˆí˜¸
+            if (u==j) % ëŒ€ê°ì„±ë¶„
                 for k = 1:N
                     Ybus(u,j) = Ybus(u,j)+Y(u,k);
                 end
-            else % ºñ´ë°¢¼ººÐ
-                Ybus(j,u) = -Y(u,j); % ´ëÄª Çà·Ä²Ã·Î ¸¸µë
+            else % ë¹„ëŒ€ê°ì„±ë¶„
+                Ybus(j,u) = -Y(u,j); % ëŒ€ì¹­ í–‰ë ¬ê¼´ë¡œ ë§Œë“¬
                 Ybus(u,j) = -Y(u,j);
             end
         end
     end
-    Ybus = round(Ybus*10^5)*10^-5; % Ybus ¼Ò¼ýÁ¡¾Æ·¡ 5¹øÂ° ±îÁö ³ªÅ¸³¿.
+    Ybus = round(Ybus*10^5)*10^-5; % Ybus ì†Œìˆ«ì ì•„ëž˜ 5ë²ˆì§¸ ê¹Œì§€ ë‚˜íƒ€ëƒ„.
 end
 

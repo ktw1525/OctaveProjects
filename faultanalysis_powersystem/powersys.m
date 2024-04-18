@@ -2,54 +2,54 @@ function [P,Q,V,A,Ybus,EP,EQ]=powersys()
 clear all
 clc
 format long
-%----------------ÃÊ±â°ª------------------
-fprintf('<<<Á¶·ù°è»ê>>>\n');
-Ofname = input('°èÅë ¾îµå¹ÌÅÏ½º ¹× ÃÊ±â°ª ¼³Á¤ÆÄÀÏ(ex:data\\Sample.xls) : ','s');
+%----------------ì´ˆê¸°ê°’------------------
+fprintf('<<<ì¡°ë¥˜ê³„ì‚°>>>\n');
+Ofname = input('ê³„í†µ ì–´ë“œë¯¸í„´ìŠ¤ ë° ì´ˆê¸°ê°’ ì„¤ì •íŒŒì¼(ex:data\\Sample.xls) : ','s');
 
-%----------¼³Á¤µÈ ÃÊ±â°ª ÀĞ¾î¿À±â---------
+%----------ì„¤ì •ëœ ì´ˆê¸°ê°’ ì½ì–´ì˜¤ê¸°---------
 init = xlsread(Ofname,1);
 Vi = init(1:size(init,1),4);
 Ai = init(1:size(init,1),5)*pi/180;
 Pi = init(1:size(init,1),2);
 Qi = init(1:size(init,1),3);
 BusType = init(1:size(init,1),6)';
-Ybus = Ygen(Ofname); % Ybus »ı¼º.
-SelectSolution = input('Gauss-Seidel¹ı:1, Newton-Raphson¹ı:2    > ','s');
-if SelectSolution == '1' [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus); %Gauss-Seidel¹ı
-else [Po,Qo,Vo,Ao,EP,EQ,t]=NtRs(Vi,Ai,Pi,Qi,BusType,Ybus); %Newton-Raphson¹ı
+Ybus = Ygen(Ofname); % Ybus ìƒì„±.
+SelectSolution = input('Gauss-Seidelë²•:1, Newton-Raphsonë²•:2    > ','s');
+if SelectSolution == '1' [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus); %Gauss-Seidelë²•
+else [Po,Qo,Vo,Ao,EP,EQ,t]=NtRs(Vi,Ai,Pi,Qi,BusType,Ybus); %Newton-Raphsonë²•
 end
 input('< Press ENTER KEY to continue >')
-%-------------¼ö·Å¼Óµµ ±×·¡ÇÁ-------------
+%-------------ìˆ˜ë ´ì†ë„ ê·¸ë˜í”„-------------
 Ao=(mod(Ao+pi,2*pi)-pi)*180/pi;
 figure(1)
-plot(t,[EP;EQ],'-o'); grid on; title('ÃÖ´ë »ó´ë¿ÀÂ÷À² ¼ö·Å°úÁ¤');
-legend('P','Q'); xlabel('¹İº¹È¸¼ö'); ylabel('»ó´ë¿ÀÂ÷À² ÃÖ´ë °ª(%)');
+plot(t,[EP;EQ],'-o'); grid on; title('ìµœëŒ€ ìƒëŒ€ì˜¤ì°¨ìœ¨ ìˆ˜ë ´ê³¼ì •');
+legend('P','Q'); xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('ìƒëŒ€ì˜¤ì°¨ìœ¨ ìµœëŒ€ ê°’(%)');
 figure(2)
-subplot(2,2,1); plot([0 t],Po,'-o'); grid on; title('<P°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('P');
-subplot(2,2,2); plot([0 t],Qo,'-o'); grid on; title('<Q°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('Q');
-subplot(2,2,3); plot([0 t],Vo,'-o'); grid on; title('<V°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('V');
-subplot(2,2,4); plot([0 t],Ao,'-o'); grid on; title('<¥è°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('¥è');
-%---------------°á°ú Ãâ·Â----------------
+subplot(2,2,1); plot([0 t],Po,'-o'); grid on; title('<Pê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('P');
+subplot(2,2,2); plot([0 t],Qo,'-o'); grid on; title('<Qê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('Q');
+subplot(2,2,3); plot([0 t],Vo,'-o'); grid on; title('<Vê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('V');
+subplot(2,2,4); plot([0 t],Ao,'-o'); grid on; title('<Î¸ê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('Î¸');
+%---------------ê²°ê³¼ ì¶œë ¥----------------
 itN = length([0 t]);
-fprintf('\n< ÃÊ±â ¼³Á¤ °ª >')
-fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','¥è')
+fprintf('\n< ì´ˆê¸° ì„¤ì • ê°’ >')
+fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','Î¸')
 fprintf('%4d %8d %15.4f %15.4f %15.4f %15.4f\n',[[1:length(BusType)].' ...
     BusType.' Pi Qi Vi Ai].')
-fprintf('\n< °á°ú °ª >')
-fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','¥è')
+fprintf('\n< ê²°ê³¼ ê°’ >')
+fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','Î¸')
 fprintf('%4d %8d %15.4f %15.4f %15.4f %15.4f\n',[[1:length(BusType)].' ...
     BusType.' Po(:,itN) Qo(:,itN) Vo(:,itN) Ao(:,itN)].');
 ResultF = fopen('data\Result.csv','w+');
-fprintf(ResultF,'%s,%s,%s,%s,%s,%s\n','BusNum','Type','P','Q','V','¥è');
+fprintf(ResultF,'%s,%s,%s,%s,%s,%s\n','BusNum','Type','P','Q','V','Î¸');
 fprintf(ResultF,'%d,%d,%f,%f,%f,%f\n',[[1:length(BusType)].' ...
     BusType.' Po(:,itN) Qo(:,itN) Vo(:,itN) Ao(:,itN)].');
 fclose(ResultF);
-fprintf('\nÃâ·Â ÀúÀå ÆÄÀÏ : "data\\Result.csv"\n');
+fprintf('\nì¶œë ¥ ì €ì¥ íŒŒì¼ : "data\\Result.csv"\n');
 fclose('all');
-if input('´Ù½Ã °è»ê?(Y) : ','s') == 'Y' powersys; end
+if input('ë‹¤ì‹œ ê³„ì‚°?(Y) : ','s') == 'Y' powersys; end
 P=Po;Q=Qo;V=Vo;A=Ao;
 end

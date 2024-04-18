@@ -1,117 +1,117 @@
-function [P,Q,V,A,Ybus]=powersys_total() % Á¶·ù°è»ê ¸ŞÀÎ ÇÔ¼ö
+function [P,Q,V,A,Ybus]=powersys_total() % ì¡°ë¥˜ê³„ì‚° ë©”ì¸ í•¨ìˆ˜
 clear all
 clc
 format long
-%----------------ÃÊ±â°ª------------------
-fprintf('<<<Á¶·ù°è»ê>>>\n');
-Ofname = input('°èÅë ¾îµå¹ÌÅÏ½º ¹× ÃÊ±â°ª ¼³Á¤ÆÄÀÏ(ex:data\\Sample.xls) : ','s');
+%----------------ì´ˆê¸°ê°’------------------
+fprintf('<<<ì¡°ë¥˜ê³„ì‚°>>>\n');
+Ofname = input('ê³„í†µ ì–´ë“œë¯¸í„´ìŠ¤ ë° ì´ˆê¸°ê°’ ì„¤ì •íŒŒì¼(ex:data\\Sample.xls) : ','s');
 
-%----------¼³Á¤µÈ ÃÊ±â°ª ÀĞ¾î¿À±â---------
+%----------ì„¤ì •ëœ ì´ˆê¸°ê°’ ì½ì–´ì˜¤ê¸°---------
 init = xlsread(Ofname,1);
 Vi = init(1:size(init,1),4);
 Ai = init(1:size(init,1),5)*pi/180;
 Pi = init(1:size(init,1),2);
 Qi = init(1:size(init,1),3);
 BusType = init(1:size(init,1),6)';
-Ybus = Ygen(Ofname); % Ybus »ı¼º.
-SelectSolution = input('Gauss-Seidal¹ı:1, Newton-Raphson¹ı:2    > ','s');
-if SelectSolution == '1' [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus); %Gauss-Seidal¹ı
-else [Po,Qo,Vo,Ao,EP,EQ,t]=NtRs(Vi,Ai,Pi,Qi,BusType,Ybus); %Newton-Raphson¹ı
+Ybus = Ygen(Ofname); % Ybus ìƒì„±.
+SelectSolution = input('Gauss-Seidalë²•:1, Newton-Raphsonë²•:2    > ','s');
+if SelectSolution == '1' [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus); %Gauss-Seidalë²•
+else [Po,Qo,Vo,Ao,EP,EQ,t]=NtRs(Vi,Ai,Pi,Qi,BusType,Ybus); %Newton-Raphsonë²•
 end
 input('< Press ENTER KEY to continue >')
-%-------------¼ö·Å¼Óµµ ±×·¡ÇÁ-------------
+%-------------ìˆ˜ë ´ì†ë„ ê·¸ë˜í”„-------------
 Ao=(mod(Ao+pi,2*pi)-pi)*180/pi;
 figure(1)
-plot(t,[EP;EQ],'-o'); grid on; title('ÃÖ´ë »ó´ë¿ÀÂ÷À² ¼ö·Å°úÁ¤');
-legend('P','Q'); xlabel('¹İº¹È¸¼ö'); ylabel('»ó´ë¿ÀÂ÷À² ÃÖ´ë °ª(%)');
+plot(t,[EP;EQ],'-o'); grid on; title('ìµœëŒ€ ìƒëŒ€ì˜¤ì°¨ìœ¨ ìˆ˜ë ´ê³¼ì •');
+legend('P','Q'); xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('ìƒëŒ€ì˜¤ì°¨ìœ¨ ìµœëŒ€ ê°’(%)');
 figure(2)
-subplot(2,2,1); plot([0 t],Po,'-o'); grid on; title('<P°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('P');
-subplot(2,2,2); plot([0 t],Qo,'-o'); grid on; title('<Q°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('Q');
-subplot(2,2,3); plot([0 t],Vo,'-o'); grid on; title('<V°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('V');
-subplot(2,2,4); plot([0 t],Ao,'-o'); grid on; title('<¥è°ª ¼ö·Å°úÁ¤>');
-xlabel('¹İº¹È¸¼ö'); ylabel('¥è');
-%---------------°á°ú Ãâ·Â----------------
+subplot(2,2,1); plot([0 t],Po,'-o'); grid on; title('<Pê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('P');
+subplot(2,2,2); plot([0 t],Qo,'-o'); grid on; title('<Qê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('Q');
+subplot(2,2,3); plot([0 t],Vo,'-o'); grid on; title('<Vê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('V');
+subplot(2,2,4); plot([0 t],Ao,'-o'); grid on; title('<Î¸ê°’ ìˆ˜ë ´ê³¼ì •>');
+xlabel('ë°˜ë³µíšŒìˆ˜'); ylabel('Î¸');
+%---------------ê²°ê³¼ ì¶œë ¥----------------
 itN = length([0 t]);
-fprintf('\n< ÃÊ±â ¼³Á¤ °ª >')
-fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','¥è')
+fprintf('\n< ì´ˆê¸° ì„¤ì • ê°’ >')
+fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','Î¸')
 fprintf('%4d %8d %15.4f %15.4f %15.4f %15.4f\n',[[1:length(BusType)].' ...
     BusType.' Pi Qi Vi Ai].')
-fprintf('\n< °á°ú °ª >')
-fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','¥è')
+fprintf('\n< ê²°ê³¼ ê°’ >')
+fprintf('\n%3s %6s %10s %15s %15s %16s\n','BusNum','Type','P','Q','V','Î¸')
 fprintf('%4d %8d %15.4f %15.4f %15.4f %15.4f\n',[[1:length(BusType)].' ...
     BusType.' Po(:,itN) Qo(:,itN) Vo(:,itN) Ao(:,itN)].');
 ResultF = fopen('data\Result.csv','w+');
-fprintf(ResultF,'%s,%s,%s,%s,%s,%s\n','BusNum','Type','P','Q','V','¥è');
+fprintf(ResultF,'%s,%s,%s,%s,%s,%s\n','BusNum','Type','P','Q','V','Î¸');
 fprintf(ResultF,'%d,%d,%f,%f,%f,%f\n',[[1:length(BusType)].' ...
     BusType.' Po(:,itN) Qo(:,itN) Vo(:,itN) Ao(:,itN)].');
 fclose(ResultF);
-fprintf('\nÃâ·Â ÀúÀå ÆÄÀÏ : "data\\Result.csv"\n');
+fprintf('\nì¶œë ¥ ì €ì¥ íŒŒì¼ : "data\\Result.csv"\n');
 fclose('all');
-if input('´Ù½Ã °è»ê?(Y) : ','s') == 'Y' powersys_total; end
+if input('ë‹¤ì‹œ ê³„ì‚°?(Y) : ','s') == 'Y' powersys_total; end
 P=Po;Q=Qo;V=Vo;A=Ao;
 end
 
-function Ybus = Ygen(filename) %Ybus ¸ŞÆ®¸¯½º »ı¼º function
+function Ybus = Ygen(filename) %Ybus ë©”íŠ¸ë¦­ìŠ¤ ìƒì„± function
 RXB = xlsread(filename,2);
-M = size(RXB,1); % µ¥ÀÌÅ¸ ÁÙ ¼ö
-N = max(max(RXB(:,1:2))); % ¸ğ¼± ÃÑ °³¼ö
-R=ones(N,N)*realmax; X=ones(N,N)*realmax; % ÀúÇ×, ¸®¾×ÅÏ½º ¸ÅÆ®¸¯½º ºó°ø°£ ¹«ÇÑ´ë·Î Ã¤¿ò
-B=zeros(N,N); G=zeros(N,N); % ¼­¼ÁÅÏ½º, ÄÁ´öÅÏ½º ¸ŞÆ®¸¯½º°¡ µÉ º¯¼ö ¼±¾ğ
+M = size(RXB,1); % ë°ì´íƒ€ ì¤„ ìˆ˜
+N = max(max(RXB(:,1:2))); % ëª¨ì„  ì´ ê°œìˆ˜
+R=ones(N,N)*realmax; X=ones(N,N)*realmax; % ì €í•­, ë¦¬ì•¡í„´ìŠ¤ ë§¤íŠ¸ë¦­ìŠ¤ ë¹ˆê³µê°„ ë¬´í•œëŒ€ë¡œ ì±„ì›€
+B=zeros(N,N); G=zeros(N,N); % ì„œì…‰í„´ìŠ¤, ì»¨ë•í„´ìŠ¤ ë©”íŠ¸ë¦­ìŠ¤ê°€ ë  ë³€ìˆ˜ ì„ ì–¸
 for n = 1:M
-    if RXB(n,1)~=RXB(n,2) % ¹ö½º¿¡ º´·Ä·Î ¿¬°áµÈ ¸®¾×ÅÏ½º ÀÏ°æ¿ì ¸¸
-        R(RXB(n,1),RXB(n,2)) = RXB(n,3); % ÀúÇ× °ª ÀúÀå
-        R(RXB(n,2),RXB(n,1)) = RXB(n,3); % ´ëÄª Çà·Ä²Ã·Î ¸¸µë
-        X(RXB(n,1),RXB(n,2)) = RXB(n,4); % ¸®¾×ÅÏ½º °ª ÀúÀå
-        X(RXB(n,2),RXB(n,1)) = RXB(n,4); % ´ëÄª Çà·Ä²Ã·Î ¸¸µë
+    if RXB(n,1)~=RXB(n,2) % ë²„ìŠ¤ì— ë³‘ë ¬ë¡œ ì—°ê²°ëœ ë¦¬ì•¡í„´ìŠ¤ ì¼ê²½ìš° ë§Œ
+        R(RXB(n,1),RXB(n,2)) = RXB(n,3); % ì €í•­ ê°’ ì €ì¥
+        R(RXB(n,2),RXB(n,1)) = RXB(n,3); % ëŒ€ì¹­ í–‰ë ¬ê¼´ë¡œ ë§Œë“¬
+        X(RXB(n,1),RXB(n,2)) = RXB(n,4); % ë¦¬ì•¡í„´ìŠ¤ ê°’ ì €ì¥
+        X(RXB(n,2),RXB(n,1)) = RXB(n,4); % ëŒ€ì¹­ í–‰ë ¬ê¼´ë¡œ ë§Œë“¬
     end
-    B(RXB(n,1),RXB(n,2)) = RXB(n,5); % ¼­¼ÁÅÏ½º °ª ÀúÀå
-    G(RXB(n,1),RXB(n,2)) = RXB(n,6); % ÄÁ´öÅÏ½º °ª ÀúÀå
+    B(RXB(n,1),RXB(n,2)) = RXB(n,5); % ì„œì…‰í„´ìŠ¤ ê°’ ì €ì¥
+    G(RXB(n,1),RXB(n,2)) = RXB(n,6); % ì»¨ë•í„´ìŠ¤ ê°’ ì €ì¥
 end
-G = G + G.'; % ¼­¼ÁÅÏ½º°ª ´ëÄªÇà·Ä²Ã·Î, ´ë°¢¼ººĞÀº 2¹è
-B = B + B.'; % ÄÁ´öÅÏ½º°ª ´ëÄªÇà·Ä²Ã·Î, ´ë°¢¼ººĞÀº 2¹è
-Y = (R+X*i).^(-1) + (ones(N,1)*sum(B*i+G)/2.*eye(N)); % ¾îµå¹ÌÅÏ½º ¸ÅÆ®¸¯½º °è»ê
-Ybus = zeros(N,N); % Ybus »ı¼º ÁØºñ
-    for u=1:N % Ybus Çà¹øÈ£
-        for j=u:N % Ybus ¿­¹øÈ£
-            if (u==j) % ´ë°¢¼ººĞ
+G = G + G.'; % ì„œì…‰í„´ìŠ¤ê°’ ëŒ€ì¹­í–‰ë ¬ê¼´ë¡œ, ëŒ€ê°ì„±ë¶„ì€ 2ë°°
+B = B + B.'; % ì»¨ë•í„´ìŠ¤ê°’ ëŒ€ì¹­í–‰ë ¬ê¼´ë¡œ, ëŒ€ê°ì„±ë¶„ì€ 2ë°°
+Y = (R+X*i).^(-1) + (ones(N,1)*sum(B*i+G)/2.*eye(N)); % ì–´ë“œë¯¸í„´ìŠ¤ ë§¤íŠ¸ë¦­ìŠ¤ ê³„ì‚°
+Ybus = zeros(N,N); % Ybus ìƒì„± ì¤€ë¹„
+    for u=1:N % Ybus í–‰ë²ˆí˜¸
+        for j=u:N % Ybus ì—´ë²ˆí˜¸
+            if (u==j) % ëŒ€ê°ì„±ë¶„
                 for k = 1:N
                     Ybus(u,j) = Ybus(u,j)+Y(u,k);
                 end
-            else % ºñ´ë°¢¼ººĞ
-                Ybus(j,u) = -Y(u,j); % ´ëÄª Çà·Ä²Ã·Î ¸¸µë
+            else % ë¹„ëŒ€ê°ì„±ë¶„
+                Ybus(j,u) = -Y(u,j); % ëŒ€ì¹­ í–‰ë ¬ê¼´ë¡œ ë§Œë“¬
                 Ybus(u,j) = -Y(u,j);
             end
         end
     end
-    Ybus = round(Ybus*10^5)*10^-5; % Ybus ¼Ò¼ıÁ¡¾Æ·¡ 5¹øÂ° ±îÁö ³ªÅ¸³¿.
+    Ybus = round(Ybus*10^5)*10^-5; % Ybus ì†Œìˆ«ì ì•„ë˜ 5ë²ˆì§¸ ê¹Œì§€ ë‚˜íƒ€ëƒ„.
 end
 
-function [P Q] = PWCal(Y,Vmag,A) % Àü·Â¹æÁ¤½Ä
-V=Vmag.*(cos(A)+sin(A)*i); % V = Vmag¡Ğ¥è
+function [P Q] = PWCal(Y,Vmag,A) % ì „ë ¥ë°©ì •ì‹
+V=Vmag.*(cos(A)+sin(A)*i); % V = Vmagâˆ Î¸
 S=V.*conj(Y*V); % S = V.*conj(I)
 P=real(S);
 Q=imag(S);
 end
 
-function [J11,J12,J21,J22] = JacobiM(Ybus,V,A) %Jacobian Matrix »ı¼º ÇÔ¼ö
-G = real(Ybus); % ÄÁ´öÅÏ½º
-B = imag(Ybus); % ¼­¼ÁÅÏ½º
-numtotal = length(V); % ¸ğ¼± ÃÑ °³¼ö
+function [J11,J12,J21,J22] = JacobiM(Ybus,V,A) %Jacobian Matrix ìƒì„± í•¨ìˆ˜
+G = real(Ybus); % ì»¨ë•í„´ìŠ¤
+B = imag(Ybus); % ì„œì…‰í„´ìŠ¤
+numtotal = length(V); % ëª¨ì„  ì´ ê°œìˆ˜
 %J11
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J11(n,n) = V(n)*G(n,n);
             for i = 1:numtotal
-                Ani = A(n)-A(i); % »óÂ÷°¢ °è»ê
-                sumJ = V(i)*(G(n,i)*cos(Ani)+B(n,i)*sin(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J11(n,n) = J11(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                Ani = A(n)-A(i); % ìƒì°¨ê° ê³„ì‚°
+                sumJ = V(i)*(G(n,i)*cos(Ani)+B(n,i)*sin(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J11(n,n) = J11(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
-            Ani = A(n)-A(m); % »óÂ÷°¢ °è»ê
+        else % ë¹„ëŒ€ê°ì„±ë¶„
+            Ani = A(n)-A(m); % ìƒì°¨ê° ê³„ì‚°
             J11(n,m) = V(n)*(G(n,m)*cos(Ani)+B(n,m)*sin(Ani));
         end
     end
@@ -119,16 +119,16 @@ end
 %J12
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J12(n,n) = 0;
             for i = 1:numtotal
                 if n==i continue; end
-                Ani = A(n)-A(i); % »óÂ÷°¢ °è»ê
-                sumJ = V(i)*V(n)*(-G(n,i)*sin(Ani)+B(n,i)*cos(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J12(n,n) = J12(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                Ani = A(n)-A(i); % ìƒì°¨ê° ê³„ì‚°
+                sumJ = V(i)*V(n)*(-G(n,i)*sin(Ani)+B(n,i)*cos(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J12(n,n) = J12(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
-            Ani = A(n)-A(m); % »óÂ÷°¢ °è»ê
+        else % ë¹„ëŒ€ê°ì„±ë¶„
+            Ani = A(n)-A(m); % ìƒì°¨ê° ê³„ì‚°
             J12(n,m) = V(n)*V(m)*(G(n,m)*sin(Ani)-B(n,m)*cos(Ani));
         end
     end
@@ -136,15 +136,15 @@ end
 %J21
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J21(n,n) = -V(n)*B(n,n);
             for i = 1:numtotal
-                Ani = A(n)-A(i); % »óÂ÷°¢ °è»ê
-                sumJ = V(i)*(G(n,i)*sin(Ani)-B(n,i)*cos(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J21(n,n) = J21(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                Ani = A(n)-A(i); % ìƒì°¨ê° ê³„ì‚°
+                sumJ = V(i)*(G(n,i)*sin(Ani)-B(n,i)*cos(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J21(n,n) = J21(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
-            Ani = A(n)-A(m); % »óÂ÷°¢ °è»ê
+        else % ë¹„ëŒ€ê°ì„±ë¶„
+            Ani = A(n)-A(m); % ìƒì°¨ê° ê³„ì‚°
             J21(n,m) = V(n)*(G(n,m)*sin(Ani)-B(n,m)*cos(Ani));
         end
     end
@@ -152,15 +152,15 @@ end
 %J22
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J22(n,n) = 0;
             for i = 1:numtotal
                 if n==i continue; end
                 Ani = A(n)-A(i);
-                sumJ = V(i)*V(n)*(B(n,i)*sin(Ani)+G(n,i)*cos(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J22(n,n) = J22(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                sumJ = V(i)*V(n)*(B(n,i)*sin(Ani)+G(n,i)*cos(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J22(n,n) = J22(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
+        else % ë¹„ëŒ€ê°ì„±ë¶„
             Ani = A(n)-A(m);
             J22(n,m) = -V(n)*V(m)*(G(n,m)*cos(Ani)+B(n,m)*sin(Ani));
         end
@@ -168,19 +168,19 @@ for n = 1:numtotal
 end
 end
 
-function [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus) %Gauss-Seidal¹ı
+function [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus) %Gauss-Seidalë²•
 P = Pi; Q= Qi; V = Vi; A = Ai;
 
-numgen = length(find(BusType==2)); % ½½·¢À» Á¦¿ÜÇÑ ¹ßÀü¸ğ¼± °³¼ö
-numload = length(find(BusType==3)); % ºÎÇÏ¸ğ¼± °³¼ö
-numtotal = numgen + numload + 1; % ÃÑ ¸ğ¼± ¼ö
+numgen = length(find(BusType==2)); % ìŠ¬ë™ì„ ì œì™¸í•œ ë°œì „ëª¨ì„  ê°œìˆ˜
+numload = length(find(BusType==3)); % ë¶€í•˜ëª¨ì„  ê°œìˆ˜
+numtotal = numgen + numload + 1; % ì´ ëª¨ì„  ìˆ˜
 
-%---------------±â·Ï¿ë º¯¼ö-------------
-Preal = P; Qreal = Q; count = 0; % ¹é¾÷, Ä«¿îÅÍ ÃÊ±âÈ­
-Po=Preal; Qo=Qreal; Vo=V; Ao=A; t=[];EP=[];EQ=[]; % ±â·Ï¿ë º¯¼öµé
-%------------Gauss-Seidal¹ı ½ÃÀÛ------------
+%---------------ê¸°ë¡ìš© ë³€ìˆ˜-------------
+Preal = P; Qreal = Q; count = 0; % ë°±ì—…, ì¹´ìš´í„° ì´ˆê¸°í™”
+Po=Preal; Qo=Qreal; Vo=V; Ao=A; t=[];EP=[];EQ=[]; % ê¸°ë¡ìš© ë³€ìˆ˜ë“¤
+%------------Gauss-Seidalë²• ì‹œì‘------------
 while(1)
-    count = count+1; % Ä«¿îÅÍ
+    count = count+1; % ì¹´ìš´í„°
     P = BusSort(P,BusType,[2 3],4,Pi);
     Q = BusSort(Q,BusType,[3],4,Qi);
     for N=1:numtotal
@@ -188,128 +188,128 @@ while(1)
         V = BusSort(V,BusType,[1 2],4,Vi);
         A = BusSort(A,BusType,[1],4,Ai);
     end
-    [P Q] = PWCal(Ybus,V,A); % Àü·Â°è»ê
-    %-------------------±â·Ï---------------------
+    [P Q] = PWCal(Ybus,V,A); % ì „ë ¥ê³„ì‚°
+    %-------------------ê¸°ë¡---------------------
     Po =[Po P];  Qo =[Qo Q];
     Vo =[Vo V];  Ao =[Ao A];
-    %----------¹İº¹°è»ê ³¡³ª´Â ½ÃÁ¡ ÆÇ´Ü----------
-    % 0À¸·Î ³ª´²Áö´Â °æ¿ì 0´ë½Å realminÀ¸·Î °è»ê ÇÔ.
+    %----------ë°˜ë³µê³„ì‚° ëë‚˜ëŠ” ì‹œì  íŒë‹¨----------
+    % 0ìœ¼ë¡œ ë‚˜ëˆ ì§€ëŠ” ê²½ìš° 0ëŒ€ì‹  realminìœ¼ë¡œ ê³„ì‚° í•¨.
     if find(Po(:,count+1)==0) Po(find(Po(:,count+1)==0),count+1)=realmin; end
     if find(Qo(:,count+1)==0) Qo(find(Qo(:,count+1)==0),count+1)=realmin; end
-    % P¿Í QÀÇ ÀÌÀü°ª°úÀÇ Àı´ë¿ÀÂ÷À²Áß °¡Àå Å« °ªÀ» ±¸ÇØÀúÀå
+    % Pì™€ Qì˜ ì´ì „ê°’ê³¼ì˜ ì ˆëŒ€ì˜¤ì°¨ìœ¨ì¤‘ ê°€ì¥ í° ê°’ì„ êµ¬í•´ì €ì¥
     errP = max(abs((Po(:,count+1) - Po(:,count))./Po(:,count+1)*100));
     errQ = max(abs((Qo(:,count+1) - Qo(:,count))./Qo(:,count+1)*100));
-    EP = [EP errP]; EQ = [EQ errQ]; % ¿ÀÂ÷À² ±â·Ï
-    t = [t count]; % Ä«¿îÅÍ ±â·Ï
-    % 0.001%ÀÌÇÏÀÇ ¿ÀÂ÷À²¶Ç´Â 50È¸ÀÌ»ó ¹İº¹¿¡¼­ Á¾·á
+    EP = [EP errP]; EQ = [EQ errQ]; % ì˜¤ì°¨ìœ¨ ê¸°ë¡
+    t = [t count]; % ì¹´ìš´í„° ê¸°ë¡
+    % 0.001%ì´í•˜ì˜ ì˜¤ì°¨ìœ¨ë˜ëŠ” 50íšŒì´ìƒ ë°˜ë³µì—ì„œ ì¢…ë£Œ
     if count>50|(errP<0.0001&errQ<0.0001) break; end 
     
 end
 end
 
-function [V,A]=voltheta(Ybus,V,A,S) %Gauss Seidal¹ı¿¡¼­ Àü¾Ğ, À§»ó°¢ ±¸ÇÏ´Â ÇÔ¼ö
+function [V,A]=voltheta(Ybus,V,A,S) %Gauss Seidalë²•ì—ì„œ ì „ì••, ìœ„ìƒê° êµ¬í•˜ëŠ” í•¨ìˆ˜
    vt=V.*(cos(A)+sin(A)*i);
    vt = (conj(S./vt)-Ybus*vt+(diag(Ybus)).*vt)./(diag(Ybus));
    V = abs(vt);
    A = angle(vt);
 end
 
-function [Po,Qo,Vo,Ao,EP,EQ,t]=NtRs(Vi,Ai,Pi,Qi,BusType,Ybus) %Newton-Raphson¹ı
+function [Po,Qo,Vo,Ao,EP,EQ,t]=NtRs(Vi,Ai,Pi,Qi,BusType,Ybus) %Newton-Raphsonë²•
 P = Pi; Q= Qi; V = Vi; A = Ai;
 
-numgen = length(find(BusType==2)); % ½½·¢À» Á¦¿ÜÇÑ ¹ßÀü¸ğ¼± °³¼ö
-numload = length(find(BusType==3)); % ºÎÇÏ¸ğ¼± °³¼ö
-numtotal = numgen + numload + 1; % ÃÑ ¸ğ¼± ¼ö
+numgen = length(find(BusType==2)); % ìŠ¬ë™ì„ ì œì™¸í•œ ë°œì „ëª¨ì„  ê°œìˆ˜
+numload = length(find(BusType==3)); % ë¶€í•˜ëª¨ì„  ê°œìˆ˜
+numtotal = numgen + numload + 1; % ì´ ëª¨ì„  ìˆ˜
 
-%---------------±â·Ï¿ë º¯¼ö-------------
-Preal = P; Qreal = Q; count = 0; % ¹é¾÷, Ä«¿îÅÍ ÃÊ±âÈ­
-Po=Preal; Qo=Qreal; Vo=V; Ao=A; t=[];EP=[];EQ=[]; % ±â·Ï¿ë º¯¼öµé
-%------------´ºÅÏ¶ø¼Õ¹ı ½ÃÀÛ------------
+%---------------ê¸°ë¡ìš© ë³€ìˆ˜-------------
+Preal = P; Qreal = Q; count = 0; % ë°±ì—…, ì¹´ìš´í„° ì´ˆê¸°í™”
+Po=Preal; Qo=Qreal; Vo=V; Ao=A; t=[];EP=[];EQ=[]; % ê¸°ë¡ìš© ë³€ìˆ˜ë“¤
+%------------ë‰´í„´ëì†ë²• ì‹œì‘------------
 while(1)
-    count = count+1; % Ä«¿îÅÍ
-    %-Àü¾Ğ, À§»ó°¢À¸·Î Àü·Â, Àü·Â º¯È­ °è»ê-
-    [P Q] = PWCal(Ybus,V,A); % Àü·Â°è»ê
+    count = count+1; % ì¹´ìš´í„°
+    %-ì „ì••, ìœ„ìƒê°ìœ¼ë¡œ ì „ë ¥, ì „ë ¥ ë³€í™” ê³„ì‚°-
+    [P Q] = PWCal(Ybus,V,A); % ì „ë ¥ê³„ì‚°
     dP = Preal-P;           dQ = Qreal-Q;
-    %---------ÀÚÄÚºñ¾È Çà·Ä ¸¸µé°í Àç±¸¼º----------
-    % J11¿¡¼­ ½½·¢,¹ßÀü¸ğ¼± ¿­ Á¦°Å, ½½·¢¸ğ¼± Çà Á¦°Å
-    % J12¿¡¼­ ½½·¢¸ğ¼± ¿­ Á¦°Å, ½½·¢¸ğ¼± Çà Á¦°Å
-    % J11¿¡¼­ ½½·¢,¹ßÀü¸ğ¼± ¿­ Á¦°Å, ½½·¢,¹ßÀü¸ğ¼± Çà Á¦°Å
-    % J11¿¡¼­ ½½·¢¸ğ¼± ¿­ Á¦°Å, ½½·¢,¹ßÀü¸ğ¼± Çà Á¦°Å
+    %---------ìì½”ë¹„ì•ˆ í–‰ë ¬ ë§Œë“¤ê³  ì¬êµ¬ì„±----------
+    % J11ì—ì„œ ìŠ¬ë™,ë°œì „ëª¨ì„  ì—´ ì œê±°, ìŠ¬ë™ëª¨ì„  í–‰ ì œê±°
+    % J12ì—ì„œ ìŠ¬ë™ëª¨ì„  ì—´ ì œê±°, ìŠ¬ë™ëª¨ì„  í–‰ ì œê±°
+    % J11ì—ì„œ ìŠ¬ë™,ë°œì „ëª¨ì„  ì—´ ì œê±°, ìŠ¬ë™,ë°œì „ëª¨ì„  í–‰ ì œê±°
+    % J11ì—ì„œ ìŠ¬ë™ëª¨ì„  ì—´ ì œê±°, ìŠ¬ë™,ë°œì „ëª¨ì„  í–‰ ì œê±°
     [J11,J12,J21,J22] = JacobiM(Ybus,V,A);
     J11 = BusSort(J11,BusType,[3],1); J11 = BusSort(J11,BusType,[2 3],2);
     J12 = BusSort(J12,BusType,[2 3],1); J12 = BusSort(J12,BusType,[2 3],2);
     J21 = BusSort(J21,BusType,[3],1); J21 = BusSort(J21,BusType,[3],2);
     J22 = BusSort(J22,BusType,[2 3],1); J22 = BusSort(J22,BusType,[3],2);
     J=[J11 J12;J21 J22];
-    %-----------³ª¸ÓÁö P,Qº¤ÅÍÀÇ Àç±¸¼º------------
-    dP0 = BusSort(dP,BusType,[2 3],2);% dP0ÀÇ ½½·¢¸ğ¼± Á¦°Å
-    dQ0 = BusSort(dQ,BusType,[3],2); % dQ0ÀÇ ½½·¢,¹ßÀü¸ğ¼± Á¦°Å
-    %---------Àü¾Ğ, À§»ó°¢ÀÇ º¯È­ °ª °è»ê----------
+    %-----------ë‚˜ë¨¸ì§€ P,Që²¡í„°ì˜ ì¬êµ¬ì„±------------
+    dP0 = BusSort(dP,BusType,[2 3],2);% dP0ì˜ ìŠ¬ë™ëª¨ì„  ì œê±°
+    dQ0 = BusSort(dQ,BusType,[3],2); % dQ0ì˜ ìŠ¬ë™,ë°œì „ëª¨ì„  ì œê±°
+    %---------ì „ì••, ìœ„ìƒê°ì˜ ë³€í™” ê°’ ê³„ì‚°----------
     dVdA = J\[dP0;dQ0]; %J\[dP0;dQ0]
-    %dVdA : [dVÀÇ ºÎÇÏ¸ğ¼±; dAÀÇ ¹ßÀü,ºÎÇÏ¸ğ¼±]
-    dV0 = dVdA(1:numload); % dV0ºĞ¸®
-    dA0 = dVdA(1+numload:size(dVdA)); %dA0ºĞ¸®
-    % dV Àç±¸¼º : dVÀÇ ½½·¢,¹ßÀü¸ğ¼± ºÎºĞÀº 0À¸·ÎÇÏ°í (ºÎÇÏ¸ğ¼±)dV0 Æ÷ÇÔ
+    %dVdA : [dVì˜ ë¶€í•˜ëª¨ì„ ; dAì˜ ë°œì „,ë¶€í•˜ëª¨ì„ ]
+    dV0 = dVdA(1:numload); % dV0ë¶„ë¦¬
+    dA0 = dVdA(1+numload:size(dVdA)); %dA0ë¶„ë¦¬
+    % dV ì¬êµ¬ì„± : dVì˜ ìŠ¬ë™,ë°œì „ëª¨ì„  ë¶€ë¶„ì€ 0ìœ¼ë¡œí•˜ê³  (ë¶€í•˜ëª¨ì„ )dV0 í¬í•¨
     dV=BusSort(zeros(numtotal,1),BusType,[3],2,dV0);
-    % dA Àç±¸¼º : dAÀÇ ½½·¢¸ğ¼± ºÎºĞÀº 0À¸·ÎÇÏ°í
-    % (½½·¢À» Á¦¿ÜÇÑ ³ª¸ÓÁö¸ğ¼±) dA0 Æ÷ÇÔ
+    % dA ì¬êµ¬ì„± : dAì˜ ìŠ¬ë™ëª¨ì„  ë¶€ë¶„ì€ 0ìœ¼ë¡œí•˜ê³ 
+    % (ìŠ¬ë™ì„ ì œì™¸í•œ ë‚˜ë¨¸ì§€ëª¨ì„ ) dA0 í¬í•¨
     dA=BusSort(zeros(numtotal,1),BusType,[2 3],2,dA0);
-    %------------Àü¾Ğ, À§»ó°¢ °ª °³¼±-------------
+    %------------ì „ì••, ìœ„ìƒê° ê°’ ê°œì„ -------------
     V = V+dV;           A = mod(A+dA,2*pi);
-    %-------P,Q ±âÁØ°ª(Âü°ª)°»½Å Preal,Qreal------
-    % ½½·¢ÀÇ P,Q ¹ßÀü¸ğ¼±ÀÇ Q´Â Âü°ªÀ» ¸ğ¸£±â ¶§¹®¿¡ °»½Å.
+    %-------P,Q ê¸°ì¤€ê°’(ì°¸ê°’)ê°±ì‹  Preal,Qreal------
+    % ìŠ¬ë™ì˜ P,Q ë°œì „ëª¨ì„ ì˜ QëŠ” ì°¸ê°’ì„ ëª¨ë¥´ê¸° ë•Œë¬¸ì— ê°±ì‹ .
     Preal=BusSort(Preal,BusType,[1],4,P);
     Qreal=BusSort(Qreal,BusType,[1 2],4,Q);
-    %-------------------±â·Ï---------------------
+    %-------------------ê¸°ë¡---------------------
     Po =[Po P];  Qo =[Qo Q];
     Vo =[Vo V];  Ao =[Ao A];
-    %----------¹İº¹°è»ê ³¡³ª´Â ½ÃÁ¡ ÆÇ´Ü----------
-    % 0À¸·Î ³ª´²Áö´Â °æ¿ì 0´ë½Å realminÀ¸·Î °è»ê ÇÔ.
+    %----------ë°˜ë³µê³„ì‚° ëë‚˜ëŠ” ì‹œì  íŒë‹¨----------
+    % 0ìœ¼ë¡œ ë‚˜ëˆ ì§€ëŠ” ê²½ìš° 0ëŒ€ì‹  realminìœ¼ë¡œ ê³„ì‚° í•¨.
     if find(Po(:,count+1)==0) Po(find(Po(:,count+1)==0),count+1)=realmin; end
     if find(Qo(:,count+1)==0) Qo(find(Qo(:,count+1)==0),count+1)=realmin; end
-    % P¿Í QÀÇ ÀÌÀü°ª°úÀÇ Àı´ë¿ÀÂ÷À²Áß °¡Àå Å« °ªÀ» ±¸ÇØÀúÀå
+    % Pì™€ Qì˜ ì´ì „ê°’ê³¼ì˜ ì ˆëŒ€ì˜¤ì°¨ìœ¨ì¤‘ ê°€ì¥ í° ê°’ì„ êµ¬í•´ì €ì¥
     errP = max(abs((Po(:,count+1) - Po(:,count))./Po(:,count+1)*100));
     errQ = max(abs((Qo(:,count+1) - Qo(:,count))./Qo(:,count+1)*100));
-    EP = [EP errP]; EQ = [EQ errQ]; % ¿ÀÂ÷À² ±â·Ï
-    t = [t count]; % Ä«¿îÅÍ ±â·Ï
-    % 0.001%ÀÌÇÏÀÇ ¿ÀÂ÷À²¶Ç´Â 50È¸ÀÌ»ó ¹İº¹¿¡¼­ Á¾·á
+    EP = [EP errP]; EQ = [EQ errQ]; % ì˜¤ì°¨ìœ¨ ê¸°ë¡
+    t = [t count]; % ì¹´ìš´í„° ê¸°ë¡
+    % 0.001%ì´í•˜ì˜ ì˜¤ì°¨ìœ¨ë˜ëŠ” 50íšŒì´ìƒ ë°˜ë³µì—ì„œ ì¢…ë£Œ
     if count>50|(errP<0.001&errQ<0.001) break; end 
 end
 end
 
-function M = BusSort(M,BusType,K,n,N) % Newton-Raphson¹ı¿¡¼­ ±âÁö·® ¹ÌÁö·®¿¡ µû¶ó Newton-Raphson½Ä º¯ÇüÇØÁÖ´Â ÇÔ¼ö
+function M = BusSort(M,BusType,K,n,N) % Newton-Raphsonë²•ì—ì„œ ê¸°ì§€ëŸ‰ ë¯¸ì§€ëŸ‰ì— ë”°ë¼ Newton-Raphsonì‹ ë³€í˜•í•´ì£¼ëŠ” í•¨ìˆ˜
 if nargin<5|isempty(N),N = [];end
-% N = []ÀÏ¶§,
-% M¸ŞÆ®¸¯½º¿¡¼­ BusTypeÀÌ KÀÎ (n=1 :¿­, n~=1 :Çà)À» Á¦°ÅÇÏ´Â function
+% N = []ì¼ë•Œ,
+% Më©”íŠ¸ë¦­ìŠ¤ì—ì„œ BusTypeì´ Kì¸ (n=1 :ì—´, n~=1 :í–‰)ì„ ì œê±°í•˜ëŠ” function
 
-% N = °ªÀÌ ÀÖÀ» ¶§,
+% N = ê°’ì´ ìˆì„ ë•Œ,
 % n = 1 or 2
-% M¸ŞÆ®¸¯½º¿¡¼­ BusTypeÀÌ KÀÎ (n=1 :¿­, n=2 :Çà)À»
-% ¼øÂ÷ÀûÀ¸·Î N¸ŞÆ®¸¯½ºÀÇ (n=1:¿­,n=2:Çà)·Î ¹Ù²ãÁÜ.
+% Më©”íŠ¸ë¦­ìŠ¤ì—ì„œ BusTypeì´ Kì¸ (n=1 :ì—´, n=2 :í–‰)ì„
+% ìˆœì°¨ì ìœ¼ë¡œ Në©”íŠ¸ë¦­ìŠ¤ì˜ (n=1:ì—´,n=2:í–‰)ë¡œ ë°”ê¿”ì¤Œ.
 % n = 3 or 4
-% M¸ŞÆ®¸¯½º¿¡¼­ BusTypeÀÌ KÀÎ (n=3 :¿­, n=±×¿Ü :Çà)À»
-% N¸ŞÆ®¸¯½ºÀÇ °°Àº À§Ä¡ÀÇ (n=3:¿­,n=else:Çà)·Î ¹Ù²ãÁÜ.
+% Më©”íŠ¸ë¦­ìŠ¤ì—ì„œ BusTypeì´ Kì¸ (n=3 :ì—´, n=ê·¸ì™¸ :í–‰)ì„
+% Në©”íŠ¸ë¦­ìŠ¤ì˜ ê°™ì€ ìœ„ì¹˜ì˜ (n=3:ì—´,n=else:í–‰)ë¡œ ë°”ê¿”ì¤Œ.
 
-% K = [x x x x .... x] ÇüÅÂ...
+% K = [x x x x .... x] í˜•íƒœ...
 Nbus=[];
 for m=1:size(K,2)
     [a,nbus] = find(BusType==K(m));
     Nbus=[Nbus nbus];
 end
 if size(N)==0
-    if n==1 %¼¼·Î·Î Á¦°Å
+    if n==1 %ì„¸ë¡œë¡œ ì œê±°
         usedbusnum = sort(Nbus); M=M(:,usedbusnum);
-    else %°¡·Î·Î Á¦°Å
+    else %ê°€ë¡œë¡œ ì œê±°
         usedbusnum = sort(Nbus); M=M(usedbusnum,:);
     end
 else
-    if n==1 %¼¼·Î·Î ´ëÀÔ
+    if n==1 %ì„¸ë¡œë¡œ ëŒ€ì…
         usedbusnum = sort(Nbus); M(:,usedbusnum)=N(:,:);
-    elseif n==2 %°¡·Î·Î ´ëÀÔ
+    elseif n==2 %ê°€ë¡œë¡œ ëŒ€ì…
         usedbusnum = sort(Nbus); M(usedbusnum,:)=N(:,:);
-    elseif n==3 %¼¼·Î·Î ´ëÀÔ
+    elseif n==3 %ì„¸ë¡œë¡œ ëŒ€ì…
         usedbusnum = sort(Nbus); M(:,usedbusnum)=N(:,usedbusnum);
-    else %°¡·Î·Î ´ëÀÔ
+    else %ê°€ë¡œë¡œ ëŒ€ì…
         usedbusnum = sort(Nbus); M(usedbusnum,:)=N(usedbusnum,:);
     end
 end

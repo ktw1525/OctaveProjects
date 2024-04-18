@@ -1,19 +1,19 @@
 function [J11,J12,J21,J22] = JacobiM(Ybus,V,A)
-G = real(Ybus); % ÄÁ´öÅÏ½º
-B = imag(Ybus); % ¼­¼ÁÅÏ½º
-numtotal = length(V); % ¸ğ¼± ÃÑ °³¼ö
+G = real(Ybus); % ì»¨ë•í„´ìŠ¤
+B = imag(Ybus); % ì„œì…‰í„´ìŠ¤
+numtotal = length(V); % ëª¨ì„  ì´ ê°œìˆ˜
 %J11
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J11(n,n) = V(n)*G(n,n);
             for i = 1:numtotal
-                Ani = A(n)-A(i); % »óÂ÷°¢ °è»ê
-                sumJ = V(i)*(G(n,i)*cos(Ani)+B(n,i)*sin(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J11(n,n) = J11(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                Ani = A(n)-A(i); % ìƒì°¨ê° ê³„ì‚°
+                sumJ = V(i)*(G(n,i)*cos(Ani)+B(n,i)*sin(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J11(n,n) = J11(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
-            Ani = A(n)-A(m); % »óÂ÷°¢ °è»ê
+        else % ë¹„ëŒ€ê°ì„±ë¶„
+            Ani = A(n)-A(m); % ìƒì°¨ê° ê³„ì‚°
             J11(n,m) = V(n)*(G(n,m)*cos(Ani)+B(n,m)*sin(Ani));
         end
     end
@@ -21,16 +21,16 @@ end
 %J12
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J12(n,n) = 0;
             for i = 1:numtotal
                 if n==i continue; end
-                Ani = A(n)-A(i); % »óÂ÷°¢ °è»ê
-                sumJ = V(i)*V(n)*(-G(n,i)*sin(Ani)+B(n,i)*cos(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J12(n,n) = J12(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                Ani = A(n)-A(i); % ìƒì°¨ê° ê³„ì‚°
+                sumJ = V(i)*V(n)*(-G(n,i)*sin(Ani)+B(n,i)*cos(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J12(n,n) = J12(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
-            Ani = A(n)-A(m); % »óÂ÷°¢ °è»ê
+        else % ë¹„ëŒ€ê°ì„±ë¶„
+            Ani = A(n)-A(m); % ìƒì°¨ê° ê³„ì‚°
             J12(n,m) = V(n)*V(m)*(G(n,m)*sin(Ani)-B(n,m)*cos(Ani));
         end
     end
@@ -38,15 +38,15 @@ end
 %J21
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J21(n,n) = -V(n)*B(n,n);
             for i = 1:numtotal
-                Ani = A(n)-A(i); % »óÂ÷°¢ °è»ê
-                sumJ = V(i)*(G(n,i)*sin(Ani)-B(n,i)*cos(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J21(n,n) = J21(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                Ani = A(n)-A(i); % ìƒì°¨ê° ê³„ì‚°
+                sumJ = V(i)*(G(n,i)*sin(Ani)-B(n,i)*cos(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J21(n,n) = J21(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
-            Ani = A(n)-A(m); % »óÂ÷°¢ °è»ê
+        else % ë¹„ëŒ€ê°ì„±ë¶„
+            Ani = A(n)-A(m); % ìƒì°¨ê° ê³„ì‚°
             J21(n,m) = V(n)*(G(n,m)*sin(Ani)-B(n,m)*cos(Ani));
         end
     end
@@ -54,15 +54,15 @@ end
 %J22
 for n = 1:numtotal
     for m = 1:numtotal
-        if n==m % ´ë°¢¼ººĞ
+        if n==m % ëŒ€ê°ì„±ë¶„
             J22(n,n) = 0;
             for i = 1:numtotal
                 if n==i continue; end
                 Ani = A(n)-A(i);
-                sumJ = V(i)*V(n)*(B(n,i)*sin(Ani)+G(n,i)*cos(Ani)); % ½Ã±×¸¶ ºÎºĞ
-                J22(n,n) = J22(n,n) + sumJ; % ½Ã±×¸¶ Àû»ê
+                sumJ = V(i)*V(n)*(B(n,i)*sin(Ani)+G(n,i)*cos(Ani)); % ì‹œê·¸ë§ˆ ë¶€ë¶„
+                J22(n,n) = J22(n,n) + sumJ; % ì‹œê·¸ë§ˆ ì ì‚°
             end
-        else % ºñ´ë°¢¼ººĞ
+        else % ë¹„ëŒ€ê°ì„±ë¶„
             Ani = A(n)-A(m);
             J22(n,m) = -V(n)*V(m)*(G(n,m)*cos(Ani)+B(n,m)*sin(Ani));
         end

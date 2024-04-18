@@ -1,6 +1,6 @@
 function [J11,J12,J21,J22] = JacobiM2(Ybus,V,A)
-G = real(Ybus); % ÄÁ´öÅÏ½º
-B = imag(Ybus); % ¼­¼ÁÅÏ½º
+G = real(Ybus); % ì»¨ë•í„´ìŠ¤
+B = imag(Ybus); % ì„œì…‰í„´ìŠ¤
 numtotal = length(V);
 Ones = ones(numtotal,1);
 dA = Ones*A' - A*Ones';

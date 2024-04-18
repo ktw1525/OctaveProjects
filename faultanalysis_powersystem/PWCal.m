@@ -1,5 +1,5 @@
 function [P Q] = PWCal(Y,Vmag,A)
-V=Vmag.*(cos(A)+sin(A)*i); % V = Vmag¡Ð¥è
+V=Vmag.*(cos(A)+sin(A)*i); % V = Vmagâˆ Î¸
 S=V.*conj(Y*V); % S = V.*conj(I)
 P=real(S);
 Q=imag(S);

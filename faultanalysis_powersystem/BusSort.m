@@ -1,36 +1,36 @@
 function M = BusSort(M,BusType,K,n,N)
 if nargin<5|isempty(N),N = [];end
-% N = []ÀÏ¶§,
-% M¸ÞÆ®¸¯½º¿¡¼­ BusTypeÀÌ KÀÎ (n=1 :¿­, n~=1 :Çà)À» Á¦°ÅÇÏ´Â function
+% N = []ì¼ë•Œ,
+% Më©”íŠ¸ë¦­ìŠ¤ì—ì„œ BusTypeì´ Kì¸ (n=1 :ì—´, n~=1 :í–‰)ì„ ì œê±°í•˜ëŠ” function
 
-% N = °ªÀÌ ÀÖÀ» ¶§,
+% N = ê°’ì´ ìžˆì„ ë•Œ,
 % n = 1 or 2
-% M¸ÞÆ®¸¯½º¿¡¼­ BusTypeÀÌ KÀÎ (n=1 :¿­, n=2 :Çà)À»
-% ¼øÂ÷ÀûÀ¸·Î N¸ÞÆ®¸¯½ºÀÇ (n=1:¿­,n=2:Çà)·Î ¹Ù²ãÁÜ.
+% Më©”íŠ¸ë¦­ìŠ¤ì—ì„œ BusTypeì´ Kì¸ (n=1 :ì—´, n=2 :í–‰)ì„
+% ìˆœì°¨ì ìœ¼ë¡œ Në©”íŠ¸ë¦­ìŠ¤ì˜ (n=1:ì—´,n=2:í–‰)ë¡œ ë°”ê¿”ì¤Œ.
 % n = 3 or 4
-% M¸ÞÆ®¸¯½º¿¡¼­ BusTypeÀÌ KÀÎ (n=3 :¿­, n=±×¿Ü :Çà)À»
-% N¸ÞÆ®¸¯½ºÀÇ °°Àº À§Ä¡ÀÇ (n=3:¿­,n=else:Çà)·Î ¹Ù²ãÁÜ.
+% Më©”íŠ¸ë¦­ìŠ¤ì—ì„œ BusTypeì´ Kì¸ (n=3 :ì—´, n=ê·¸ì™¸ :í–‰)ì„
+% Në©”íŠ¸ë¦­ìŠ¤ì˜ ê°™ì€ ìœ„ì¹˜ì˜ (n=3:ì—´,n=else:í–‰)ë¡œ ë°”ê¿”ì¤Œ.
 
-% K = [x x x x .... x] ÇüÅÂ...
+% K = [x x x x .... x] í˜•íƒœ...
 Nbus=[];
 for m=1:size(K,2)
     [a,nbus] = find(BusType==K(m));
     Nbus=[Nbus nbus];
 end
 if size(N)==0
-    if n==1 %¼¼·Î·Î Á¦°Å
+    if n==1 %ì„¸ë¡œë¡œ ì œê±°
         usedbusnum = sort(Nbus); M=M(:,usedbusnum);
-    else %°¡·Î·Î Á¦°Å
+    else %ê°€ë¡œë¡œ ì œê±°
         usedbusnum = sort(Nbus); M=M(usedbusnum,:);
     end
 else
-    if n==1 %¼¼·Î·Î ´ëÀÔ
+    if n==1 %ì„¸ë¡œë¡œ ëŒ€ìž…
         usedbusnum = sort(Nbus); M(:,usedbusnum)=N(:,:);
-    elseif n==2 %°¡·Î·Î ´ëÀÔ
+    elseif n==2 %ê°€ë¡œë¡œ ëŒ€ìž…
         usedbusnum = sort(Nbus); M(usedbusnum,:)=N(:,:);
-    elseif n==3 %¼¼·Î·Î ´ëÀÔ
+    elseif n==3 %ì„¸ë¡œë¡œ ëŒ€ìž…
         usedbusnum = sort(Nbus); M(:,usedbusnum)=N(:,usedbusnum);
-    else %°¡·Î·Î ´ëÀÔ
+    else %ê°€ë¡œë¡œ ëŒ€ìž…
         usedbusnum = sort(Nbus); M(usedbusnum,:)=N(usedbusnum,:);
     end
 end

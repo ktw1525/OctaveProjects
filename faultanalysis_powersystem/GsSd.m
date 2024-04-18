@@ -1,16 +1,16 @@
-function [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus) %Gauss-Seidel¹ý
+function [Po,Qo,Vo,Ao,EP,EQ,t]=GsSd(Vi,Ai,Pi,Qi,BusType,Ybus) %Gauss-Seidelë²•
 P = Pi; Q= Qi; V = Vi; A = Ai;
 
-numgen = length(find(BusType==2)); % ½½·¢À» Á¦¿ÜÇÑ ¹ßÀü¸ð¼± °³¼ö
-numload = length(find(BusType==3)); % ºÎÇÏ¸ð¼± °³¼ö
-numtotal = numgen + numload + 1; % ÃÑ ¸ð¼± ¼ö
+numgen = length(find(BusType==2)); % ìŠ¬ëž™ì„ ì œì™¸í•œ ë°œì „ëª¨ì„  ê°œìˆ˜
+numload = length(find(BusType==3)); % ë¶€í•˜ëª¨ì„  ê°œìˆ˜
+numtotal = numgen + numload + 1; % ì´ ëª¨ì„  ìˆ˜
 
-%---------------±â·Ï¿ë º¯¼ö-------------
-Preal = P; Qreal = Q; count = 0; % ¹é¾÷, Ä«¿îÅÍ ÃÊ±âÈ­
-Po=Preal; Qo=Qreal; Vo=V; Ao=A; t=[];EP=[];EQ=[]; % ±â·Ï¿ë º¯¼öµé
-%------------Gauss-Seidal¹ý ½ÃÀÛ------------
+%---------------ê¸°ë¡ìš© ë³€ìˆ˜-------------
+Preal = P; Qreal = Q; count = 0; % ë°±ì—…, ì¹´ìš´í„° ì´ˆê¸°í™”
+Po=Preal; Qo=Qreal; Vo=V; Ao=A; t=[];EP=[];EQ=[]; % ê¸°ë¡ìš© ë³€ìˆ˜ë“¤
+%------------Gauss-Seidalë²• ì‹œìž‘------------
 while(1)
-    count = count+1; % Ä«¿îÅÍ
+    count = count+1; % ì¹´ìš´í„°
     P = BusSort(P,BusType,[2 3],4,Pi);
     Q = BusSort(Q,BusType,[3],4,Qi);
     for N=1:numtotal
@@ -18,20 +18,20 @@ while(1)
         V = BusSort(V,BusType,[1 2],4,Vi);
         A = BusSort(A,BusType,[1],4,Ai);
     end
-    [P Q] = PWCal(Ybus,V,A); % Àü·Â°è»ê
-    %-------------------±â·Ï---------------------
+    [P Q] = PWCal(Ybus,V,A); % ì „ë ¥ê³„ì‚°
+    %-------------------ê¸°ë¡---------------------
     Po =[Po P];  Qo =[Qo Q];
     Vo =[Vo V];  Ao =[Ao A];
-    %----------¹Ýº¹°è»ê ³¡³ª´Â ½ÃÁ¡ ÆÇ´Ü----------
-    % 0À¸·Î ³ª´²Áö´Â °æ¿ì 0´ë½Å realminÀ¸·Î °è»ê ÇÔ.
+    %----------ë°˜ë³µê³„ì‚° ëë‚˜ëŠ” ì‹œì  íŒë‹¨----------
+    % 0ìœ¼ë¡œ ë‚˜ëˆ ì§€ëŠ” ê²½ìš° 0ëŒ€ì‹  realminìœ¼ë¡œ ê³„ì‚° í•¨.
     if find(Po(:,count+1)==0) Po(find(Po(:,count+1)==0),count+1)=realmin; end
     if find(Qo(:,count+1)==0) Qo(find(Qo(:,count+1)==0),count+1)=realmin; end
-    % P¿Í QÀÇ ÀÌÀü°ª°úÀÇ Àý´ë¿ÀÂ÷À²Áß °¡Àå Å« °ªÀ» ±¸ÇØÀúÀå
+    % Pì™€ Qì˜ ì´ì „ê°’ê³¼ì˜ ì ˆëŒ€ì˜¤ì°¨ìœ¨ì¤‘ ê°€ìž¥ í° ê°’ì„ êµ¬í•´ì €ìž¥
     errP = max(abs((Po(:,count+1) - Po(:,count))./Po(:,count+1)*100));
     errQ = max(abs((Qo(:,count+1) - Qo(:,count))./Qo(:,count+1)*100));
-    EP = [EP errP]; EQ = [EQ errQ]; % ¿ÀÂ÷À² ±â·Ï
-    t = [t count]; % Ä«¿îÅÍ ±â·Ï
-    % 0.001%ÀÌÇÏÀÇ ¿ÀÂ÷À²¶Ç´Â 50È¸ÀÌ»ó ¹Ýº¹¿¡¼­ Á¾·á
+    EP = [EP errP]; EQ = [EQ errQ]; % ì˜¤ì°¨ìœ¨ ê¸°ë¡
+    t = [t count]; % ì¹´ìš´í„° ê¸°ë¡
+    % 0.001%ì´í•˜ì˜ ì˜¤ì°¨ìœ¨ë˜ëŠ” 50íšŒì´ìƒ ë°˜ë³µì—ì„œ ì¢…ë£Œ
     if count>50|(errP<0.001&errQ<0.001) break; end 
 end
 end
