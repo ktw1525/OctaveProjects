@@ -1,10 +1,11 @@
 function ret = rcmeter_lsm()
+  
   #최소 제곱법을 통해서 근사화 시킴
-  EpochMax = 2;
-  solvRate = 0.1;
+  EpochMax = 10;
+  solvRate = 0.01;
   Cycl = 3;       # 주기 수
-  Len = 20;     # 데이터 길이
-  Vp = 311;       # 전압 진폭
+  Len = 200;     # 데이터 길이
+  Vp = 220;       # 전압 진폭
   w = 2*pi*Cycl/Len;
 
   n_t = 1:1:Len; # 샘플번호
@@ -42,9 +43,9 @@ function ret = rcmeter_lsm()
     ret = ( g + dcdn ) .* v + c .* dvdn;
   endfunction
 
-  function ret = ErrorSquare(it, ir, samples)
+  function ret = ErrorSquare(it, ir, N)
     ret = 0;
-    for m=1:1:samples
+    for m=N
       err = ir(m) - it(m);
       ret += err*err/samples;
     endfor
@@ -80,25 +81,15 @@ function ret = rcmeter_lsm()
   # 1) 컨덕턴스 Gr
   # 2) 캐패시턴스 Cr
   # 3) 오차율(참 값: G, C, 측정 값: Gr, Cr)
-
-
-
-  function ret = dEda_k(p, i, v, dvdn, g, c, dcdn, samples, nth)
-    ret = 0;
+  
+  function ret = dIda_k(p, i, v, dvdn, g, c, dcdn)
     pn = p -1;
-    err = i - (g + dcdn).*v + c.*dvdn;
-    for m=1:1:samples
-      ret += -2*err(m)*(m^pn*v(m))/samples;
-    endfor
+    ret = m^pn*v(m);
   endfunction
 
-  function ret = dEdb_k(p, i, v, dvdn, g, c, dcdn, samples, nth)
-    ret = 0;
+  function ret = dIdb_k(p, i, v, dvdn, g, c, dcdn)
     pn = p -1;
-    err = i - (g + dcdn).*v + c.*dvdn;
-    for m=1:1:samples
-      ret += -2*err(m)*(pn*m^(pn-1)*v(m)+m^pn*dvdn(m))/samples;
-    endfor
+    ret = pn*m^(pn-1)*v(m) + m^pn*dvdn(m);
   endfunction
 
   a_r = ones(size(a_t));
@@ -108,16 +99,15 @@ function ret = rcmeter_lsm()
 
   figure(1);
   errt = [];
-  [G_r, C_r, dCdn_r] = refreshValues(a_r, b_r, n_t);
-  I_r = Current(V_t, dVdn_t, G_r, C_r, dCdn_r); #추정전류
-  
+  Irms = ErrorSquare(I_t, zeros(size(I_t)), n_t);  
+  %샘플 개수 미지수 만큼 나눠서 에러를 계산하고 매트리스를 푼다!
   
   for epoch=1:1:EpochMax
     [G_r, C_r, dCdn_r] = refreshValues(a_r, b_r, n_t);
     I_r = Current(V_t, dVdn_t, G_r, C_r, dCdn_r); #추정전류
-    Err = ErrorSquare(I_t, I_r, Len);
+    Err = ErrorSquare(I_t, I_r, n_t);
     errt = [errt Err];
-    plot(epoch, Err, 'rx-');
+    plot(errt, 'rx-');
     drawnow;
     printf("%d) %.3f\r\n",epoch, Err); 
     
@@ -127,20 +117,18 @@ function ret = rcmeter_lsm()
         printf("Finish 1");
         break;
       end
-      if(( abs( errt(epoch) - errt(epoch-1) ) / errt(epoch-1) ) < 0.03)
+      if( abs( Err / Irms ) < 0.03)
         printf("Finish 2");
         break;
       end
     end
     
+    # dI = dIda * da + dIdb * db
+        
+ 
     for p=1:1:ath
-       dEda_r_el = dEda_k(p, I_t, V_t, dVdn_t, G_r, C_r, dCdn_r, Len, ath)
-       a_r(p) -= Err/dEda_r_el*solvRate;
-    endfor
+
     
-    for p=1:1:bth
-       dEdb_r_el = dEdb_k(p, I_t, V_t, dVdn_t, G_r, C_r, dCdn_r, Len, bth)
-       b_r(p) -= Err/dEdb_r_el*solvRate;
     endfor
   endfor
   
