@@ -97,8 +97,8 @@ function ret = rcmeter_lsm()
     ret /= length(N);
   endfunction
 
-  a_r = zeros(size(a_t));
-  b_r = zeros(size(b_t));
+  a_r = zeros(10,1);
+  b_r = zeros(10,1);
 
   figure(1);
   errt = [];
@@ -177,6 +177,6 @@ function ret = rcmeter_lsm()
   plot(n_t, C_t, 'bo', n_t, C_r, 'rx');
   title('Capacitance (F)');
 
-  printf("G = %s\r\n",polyout(a_r, 'n'));
-  printf("C = %s\r\n",polyout(b_r, 'n'));
+  printf("G = %s\r\n",polyout(flip(a_r), 'n'));
+  printf("C = %s\r\n",polyout(flip(b_r), 'n'));
 endfunction
