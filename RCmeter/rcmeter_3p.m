@@ -3,7 +3,7 @@ function ret = rcmeter_3p()
   solvRate = 0.01;
   beta = 0.998;
   Cycl = 1;
-  Len = 144;
+  Len = 12;
   Vp = 220;
   w = 2*pi*Cycl/Len/5;
 
@@ -173,7 +173,7 @@ function ret = rcmeter_3p()
     # a_r <- a_r + x;
 
     rows = vars_num;
-    batchSize = rows ; #floor(Len/rows);
+    batchSize = floor(Len/rows);
     M = [];
     B = [];
     B = [];
