@@ -1,35 +1,16 @@
 function ret = rcmeter_3p()
-  EpochMax = 1000;
-  solvRate = 0.01;
-  beta = 0.998;
-  Cycl = 1;
-  Len = 12;
-  Vp = 220;
-  w = 2*pi*Cycl/Len/5;
-
-  n_t = 1:1:Len;
-  a1_t = [ 0.0002 0.002 ];
-  b1_t = [ 0.3 -0.002 ];
-  a2_t = [ 0.0001 0.001 ];
-  b2_t = [ 0.5 -0.001 ];
-  a3_t = [ 0.0003 0.004 ];
-  b3_t = [ 0.4 -0.002 ];
-
-  a1th = length(a1_t);
-  a2th = length(a2_t);
-  a3th = length(a3_t);
-  b1th = length(b1_t);
-  b2th = length(b2_t);
-  b3th = length(b3_t);
-  vars_num =  a1th + b1th + a2th + b2th + a3th + b3th;
-
-  V1_t = Vp*sin(w*n_t) + Vp*0.01*sin(3*w*n_t);
-  V2_t = Vp*sin(w*n_t + 2*pi/3) + Vp*0.003*sin(5*w*n_t);
-  V3_t = Vp*sin(w*n_t - 2*pi/3);
-
-  dV1dn_t = w*Vp*cos(w*n_t) + 3*w*Vp*0.01*cos(3*w*n_t);
-  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3) + 5*w*Vp*0.003*cos(5*w*n_t);
-  dV3dn_t = w*Vp*cos(w*n_t - 2*pi/3);
+  function ret = addNoise(sig, rate)
+    len = length(sig);
+    ret = sig;
+    rms = 0;
+    for i=1:1:len
+      rms += sig(i)*sig(i)/len;
+    endfor
+    rms = sqrt(rms);
+    for i=1:1:len
+      ret(i) += (2*rand() - 1)*rms*rate;
+    endfor
+  endfunction
 
   function ret = polyFunc(a, x)
     ret = 0;
@@ -75,12 +56,68 @@ function ret = rcmeter_3p()
     endfor
   endfunction
 
+  function ret = dIda_k(p, N, v, dvdn)
+    pn = p -1;
+    ret = 0;
+    for m=N
+      ret += m^pn*v(m);
+    endfor
+    ret /= length(N);
+  endfunction
+
+  function ret = dIdb_k(p, N, v, dvdn)
+    pn = p -1;
+    ret = 0;
+    for m=N
+      ret += pn*m^(pn-1)*v(m) + m^pn*dvdn(m);
+    endfor
+    ret /= length(N);
+  endfunction
+
+  EpochMax = 1000;
+  EndErr = 0.001;
+  solvRate = 0.1;
+  beta = 0.998;
+  Cycl = 0.01;
+  Len = 12;
+  freq1 = 11;
+  freq2 = 13;
+  SamplingRate = Len/Cycl; # Samples per 1 cycle.
+  Vp = 220;
+  w = 2*pi*Cycl/Len;
+
+  printf("SampleLength: %d\r\n", Len);
+  printf("SamplingRate: %d\r\n\r\n", SamplingRate);
+
+  n_t = 1:1:Len;
+  a1_t = [ 0.0002 0.002 ];
+  b1_t = [ 0.03 -0.002 ];
+  a2_t = [ 0.0001 0.001 ];
+  b2_t = [ 0.005 -0.001 ];
+  a3_t = [ 0.0003 0.004 ];
+  b3_t = [ 0.04 -0.002 ];
+
+  V1_t = Vp*sin(w*n_t) + Vp*0.01*sin(freq1*w*n_t);
+  V2_t = Vp*sin(w*n_t + 2*pi/3) + Vp*0.003*sin(freq2*w*n_t);
+  V3_t = Vp*sin(w*n_t - 2*pi/3);
+V1_t = addNoise(V1_t, 0.001);
+V2_t = addNoise(V2_t, 0.001);
+V3_t = addNoise(V3_t, 0.001);
+
+  dV1dn_t = w*Vp*cos(w*n_t) + freq1*w*Vp*0.01*cos(freq1*w*n_t);
+  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3) + freq2*w*Vp*0.003*cos(freq2*w*n_t);
+  dV3dn_t = w*Vp*cos(w*n_t - 2*pi/3);
+dV1dn_t = addNoise(dV1dn_t, 0.002);
+dV2dn_t = addNoise(dV2dn_t, 0.002);
+dV3dn_t = addNoise(dV3dn_t, 0.002);
+
   [G1_t, C1_t, dC1dn_t] = refreshValues(a1_t, b1_t, n_t);
   [G2_t, C2_t, dC2dn_t] = refreshValues(a2_t, b2_t, n_t);
   [G3_t, C3_t, dC3dn_t] = refreshValues(a3_t, b3_t, n_t);
   I_t = Current(V1_t, dV1dn_t, G1_t, C1_t, dC1dn_t) + ...
         Current(V2_t, dV2dn_t, G2_t, C2_t, dC2dn_t) + ...
         Current(V3_t, dV3dn_t, G3_t, C3_t, dC3dn_t);
+  I_t = addNoise(I_t, 0.01);
 
   inputGraph = figure(1);
   subplot(4,2,1);
@@ -108,35 +145,29 @@ function ret = rcmeter_3p()
   plot(n_t, C3_t, 'b');
   title('Capacitance (F)');
 
-  function ret = dIda_k(p, N, v, dvdn)
-    pn = p -1;
-    ret = 0;
-    for m=N
-      ret += m^pn*v(m);
-    endfor
-    ret /= length(N);
-  endfunction
 
-  function ret = dIdb_k(p, N, v, dvdn)
-    pn = p -1;
-    ret = 0;
-    for m=N
-      ret += pn*m^(pn-1)*v(m) + m^pn*dvdn(m);
-    endfor
-    ret /= length(N);
-  endfunction
 
-  a1_r = zeros(size(a1_t));
-  b1_r = zeros(size(b1_t));
-  a2_r = zeros(size(a2_t));
-  b2_r = zeros(size(b2_t));
-  a3_r = zeros(size(a3_t));
-  b3_r = zeros(size(b3_t));
+  a1_r = [0,0];
+  b1_r = [0,0];
+  a2_r = [0,0];
+  b2_r = [0,0];
+  a3_r = [0,0];
+  b3_r = [0,0];
+
+  a1th = length(a1_r);
+  a2th = length(a2_r);
+  a3th = length(a3_r);
+  b1th = length(b1_r);
+  b2th = length(b2_r);
+  b3th = length(b3_r);
+  vars_num =  a1th + b1th + a2th + b2th + a3th + b3th;
 
   figure(3);
   errt = [];
   Irms = ErrorSquare(I_t, zeros(size(I_t)), n_t);
 
+  Err0 = 0;
+  printf("idx errDiffRate\r\n");
   for epoch=1:1:EpochMax
     [G1_r, C1_r, dC1dn_r] = refreshValues(a1_r, b1_r, n_t);
     [G2_r, C2_r, dC2dn_r] = refreshValues(a2_r, b2_r, n_t);
@@ -149,15 +180,18 @@ function ret = rcmeter_3p()
     errt = [errt Err];
     plot(errt, 'rx-');
     drawnow;
-    printf("%d) %.3f\r\n",epoch, Err);
+    errDiffRate = (Err0 - Err) / Err * 100;
+    printf("%d) %.3f\r\n",epoch, errDiffRate );
 
     if ( Err == 0 ) break; end
+    if ( epoch > 1 && errDiffRate < 0.03 ) break; end
+
     if epoch > 2
       if(errt(epoch) == 0)
         printf("Finish 1\r\n");
         break;
       end
-      if( abs( Err / Irms ) < 0.001)
+      if( abs( Err / Irms ) < EndErr )
         printf("Finish 2\r\n");
         break;
       end
@@ -241,6 +275,7 @@ function ret = rcmeter_3p()
     for p=1:1:b3th
       b3_r(p) += x_r(p+cursor)*solvRate;
     endfor
+    Err0 = Err;
   endfor
 
   inputGraph = figure(2);
