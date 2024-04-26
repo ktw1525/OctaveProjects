@@ -1,13 +1,13 @@
 function ret = rcmeter_3p()
   EpochMax = 1000;
-  solvRate = 0.001;
+  solvRate = 0.01;
+  beta = 0.998;
   Cycl = 1;
-  Len = 200;
+  Len = 144;
   Vp = 220;
-  w = 2*pi*Cycl/Len;
+  w = 2*pi*Cycl/Len/5;
 
   n_t = 1:1:Len;
-
   a1_t = [ 0.0002 0.002 ];
   b1_t = [ 0.3 -0.002 ];
   a2_t = [ 0.0001 0.001 ];
@@ -23,13 +23,13 @@ function ret = rcmeter_3p()
   b3th = length(b3_t);
   vars_num =  a1th + b1th + a2th + b2th + a3th + b3th;
 
-  V1_t = Vp*sin(w*n_t) + Vp*0.01*sin(3*w*n_t) + Vp*0.005*sin(5*w*n_t);
-  V2_t = Vp*sin(w*n_t + 2*pi/3) + Vp*0.02*sin(3*w*n_t) + Vp*0.003*sin(5*w*n_t);;
-  V3_t = Vp*sin(w*n_t - 2*pi/3) + Vp*0.03*sin(3*w*n_t) + Vp*0.001*sin(5*w*n_t);;
+  V1_t = Vp*sin(w*n_t) + Vp*0.01*sin(3*w*n_t);
+  V2_t = Vp*sin(w*n_t + 2*pi/3) + Vp*0.003*sin(5*w*n_t);
+  V3_t = Vp*sin(w*n_t - 2*pi/3);
 
-  dV1dn_t = w*Vp*cos(w*n_t) + 3*w*Vp*0.01*cos(3*w*n_t) + 5*w*Vp*0.005*cos(5*w*n_t);
-  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3) + 3*w*Vp*0.02*cos(3*w*n_t) + 5*w*Vp*0.003*cos(5*w*n_t);
-  dV3dn_t = w*Vp*cos(w*n_t - 2*pi/3) + 3*w*Vp*0.03*cos(3*w*n_t) + 5*w*Vp*0.001*cos(5*w*n_t);
+  dV1dn_t = w*Vp*cos(w*n_t) + 3*w*Vp*0.01*cos(3*w*n_t);
+  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3) + 5*w*Vp*0.003*cos(5*w*n_t);
+  dV3dn_t = w*Vp*cos(w*n_t - 2*pi/3);
 
   function ret = polyFunc(a, x)
     ret = 0;
@@ -108,8 +108,6 @@ function ret = rcmeter_3p()
   plot(n_t, C3_t, 'b');
   title('Capacitance (F)');
 
-
-
   function ret = dIda_k(p, N, v, dvdn)
     pn = p -1;
     ret = 0;
@@ -164,6 +162,7 @@ function ret = rcmeter_3p()
         break;
       end
     end
+    solvRate*=beta;
 
     # dI = dIda * da + dIdb * db
     # I_t0 - I_r0 = dIda * (a_r - a_r0) + dIdb * (b_r - b_r0)
@@ -176,6 +175,7 @@ function ret = rcmeter_3p()
     rows = vars_num;
     batchSize = rows ; #floor(Len/rows);
     M = [];
+    B = [];
     B = [];
     for row= 1:1:rows
       ROW=[];
