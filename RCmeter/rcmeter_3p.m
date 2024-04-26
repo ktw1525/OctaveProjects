@@ -1,8 +1,8 @@
 function ret = rcmeter_3p()
-  EpochMax = 20;
-  solvRate = 0.01;
+  EpochMax = 1000;
+  solvRate = 0.001;
   Cycl = 1;
-  Len = 50;
+  Len = 200;
   Vp = 220;
   w = 2*pi*Cycl/Len;
 
@@ -21,15 +21,15 @@ function ret = rcmeter_3p()
   b1th = length(b1_t);
   b2th = length(b2_t);
   b3th = length(b3_t);
-  vars_num =  + b1th + a2th + b2th + a3th + b3th;
+  vars_num =  a1th + b1th + a2th + b2th + a3th + b3th;
 
-  V1_t = Vp*sin(w*n_t);
-  V2_t = Vp*sin(w*n_t + 2*pi/3);
-  V3_t = Vp*sin(w*n_t - 2*pi/3);
-  
-  dV1dn_t = w*Vp*cos(w*n_t);
-  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3);
-  dV3dn_t = w*Vp*cos(w*n_t - 2*pi/3);
+  V1_t = Vp*sin(w*n_t) + Vp*0.01*sin(3*w*n_t) + Vp*0.005*sin(5*w*n_t);
+  V2_t = Vp*sin(w*n_t + 2*pi/3) + Vp*0.02*sin(3*w*n_t) + Vp*0.003*sin(5*w*n_t);;
+  V3_t = Vp*sin(w*n_t - 2*pi/3) + Vp*0.03*sin(3*w*n_t) + Vp*0.001*sin(5*w*n_t);;
+
+  dV1dn_t = w*Vp*cos(w*n_t) + 3*w*Vp*0.01*cos(3*w*n_t) + 5*w*Vp*0.005*cos(5*w*n_t);
+  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3) + 3*w*Vp*0.02*cos(3*w*n_t) + 5*w*Vp*0.003*cos(5*w*n_t);
+  dV3dn_t = w*Vp*cos(w*n_t - 2*pi/3) + 3*w*Vp*0.03*cos(3*w*n_t) + 5*w*Vp*0.001*cos(5*w*n_t);
 
   function ret = polyFunc(a, x)
     ret = 0;
@@ -107,9 +107,9 @@ function ret = rcmeter_3p()
   subplot(4,2,8);
   plot(n_t, C3_t, 'b');
   title('Capacitance (F)');
-  
-  
-  
+
+
+
   function ret = dIda_k(p, N, v, dvdn)
     pn = p -1;
     ret = 0;
@@ -134,8 +134,8 @@ function ret = rcmeter_3p()
   b2_r = zeros(size(b2_t));
   a3_r = zeros(size(a3_t));
   b3_r = zeros(size(b3_t));
-  
-  figure(2);
+
+  figure(3);
   errt = [];
   Irms = ErrorSquare(I_t, zeros(size(I_t)), n_t);
 
@@ -143,7 +143,7 @@ function ret = rcmeter_3p()
     [G1_r, C1_r, dC1dn_r] = refreshValues(a1_r, b1_r, n_t);
     [G2_r, C2_r, dC2dn_r] = refreshValues(a2_r, b2_r, n_t);
     [G3_r, C3_r, dC3dn_r] = refreshValues(a3_r, b3_r, n_t);
-    
+
     I_r = Current(V1_t, dV1dn_t, G1_r, C1_r, dC1dn_r)+...
           Current(V2_t, dV2dn_t, G2_r, C2_r, dC2dn_r)+...
           Current(V3_t, dV3dn_t, G3_r, C3_r, dC3dn_r);
@@ -173,7 +173,7 @@ function ret = rcmeter_3p()
     # solv: B = M * x
     # a_r <- a_r + x;
 
-    rows = a1th+b1th+a2th+b2th+a3th+b3th;
+    rows = vars_num;
     batchSize = rows ; #floor(Len/rows);
     M = [];
     B = [];
@@ -183,21 +183,27 @@ function ret = rcmeter_3p()
       for p=1:1:a1th
         ROW = [ROW, dIda_k(p, n_r, V1_t, dV1dn_t)];
       endfor
+
       for p=1:1:a2th
         ROW = [ROW, dIda_k(p, n_r, V2_t, dV2dn_t)];
       endfor
+
       for p=1:1:a3th
         ROW = [ROW, dIda_k(p, n_r, V3_t, dV3dn_t)];
       endfor
+
       for p=1:1:b1th
         ROW = [ROW, dIdb_k(p, n_r, V1_t, dV1dn_t)];
       endfor
+
       for p=1:1:b2th
         ROW = [ROW, dIdb_k(p, n_r, V2_t, dV2dn_t)];
       endfor
+
       for p=1:1:b3th
         ROW = [ROW, dIdb_k(p, n_r, V3_t, dV3dn_t)];
       endfor
+
       I_t0 = Current(V1_t(n_r), dV1dn_t(n_r), G1_t(n_r), C1_t(n_r), dC1dn_t(n_r)) +...
              Current(V2_t(n_r), dV2dn_t(n_r), G2_t(n_r), C2_t(n_r), dC2dn_t(n_r)) +...
              Current(V3_t(n_r), dV3dn_t(n_r), G3_t(n_r), C3_t(n_r), dC3dn_t(n_r));
@@ -214,27 +220,26 @@ function ret = rcmeter_3p()
     cursor=0;
     for p=1:1:a1th
       a1_r(p) += x_r(p+cursor)*solvRate;
-      cursor++;
     endfor
+    cursor+=a1th;
     for p=1:1:a2th
       a2_r(p) += x_r(p+cursor)*solvRate;
-      cursor++;
     endfor
+    cursor+=a2th;
     for p=1:1:a3th
       a3_r(p) += x_r(p+cursor)*solvRate;
-      cursor++;
     endfor
+    cursor+=a3th;
     for p=1:1:b1th
       b1_r(p) += x_r(p+cursor)*solvRate;
-      cursor++;
     endfor
+    cursor+=b1th;
     for p=1:1:b2th
       b2_r(p) += x_r(p+cursor)*solvRate;
-      cursor++;
     endfor
+    cursor+=b2th;
     for p=1:1:b3th
       b3_r(p) += x_r(p+cursor)*solvRate;
-      cursor++;
     endfor
   endfor
 
@@ -263,13 +268,20 @@ function ret = rcmeter_3p()
   subplot(4,2,8);
   plot(n_t, C3_t, 'bo', n_t, C3_r, 'rx');
   title('Capacitance (F)');
-  
 
+  printf("\r\nTrue Values\r\n");
+  printf("G1 = %s\r\n",polyout(flip(a1_t), 'n'));
+  printf("C1 = %s\r\n",polyout(flip(b1_t), 'n'));
+  printf("G2 = %s\r\n",polyout(flip(a2_t), 'n'));
+  printf("C2 = %s\r\n",polyout(flip(b2_t), 'n'));
+  printf("G3 = %s\r\n",polyout(flip(a3_t), 'n'));
+  printf("C3 = %s\r\n",polyout(flip(b3_t), 'n'));
+
+  printf("\r\nEstimated Values\r\n");
   printf("G1 = %s\r\n",polyout(flip(a1_r), 'n'));
-  printf("G1 = %s\r\n",polyout(flip(a2_r), 'n'));
-  printf("G1 = %s\r\n",polyout(flip(a3_r), 'n'));
-  printf("C2 = %s\r\n",polyout(flip(b1_r), 'n'));
+  printf("C1 = %s\r\n",polyout(flip(b1_r), 'n'));
+  printf("G2 = %s\r\n",polyout(flip(a2_r), 'n'));
   printf("C2 = %s\r\n",polyout(flip(b2_r), 'n'));
-  printf("C2 = %s\r\n",polyout(flip(b3_r), 'n'));
-  
+  printf("G3 = %s\r\n",polyout(flip(a3_r), 'n'));
+  printf("C3 = %s\r\n",polyout(flip(b3_r), 'n'));
 endfunction
