@@ -1,5 +1,5 @@
 function ret = rcmeter_3pfunc(n_t, V1_t, V2_t, V3_t, dV1dn_t, dV2dn_t, dV3dn_t, I_t)
-  Len = 24;
+  Len = 12;
   EpochMax = 1000;
   EndErr = 0.001;
   solvRate = 0.01;
@@ -68,12 +68,12 @@ function ret = rcmeter_3pfunc(n_t, V1_t, V2_t, V3_t, dV1dn_t, dV2dn_t, dV3dn_t, 
   endfunction
 
 
-  a1_r = [0,0,0,0];
-  b1_r = [0,0,0,0];
-  a2_r = [0,0,0,0];
-  b2_r = [0,0,0,0];
-  a3_r = [0,0,0,0];
-  b3_r = [0,0,0,0];
+  a1_r = [0,0];
+  b1_r = [0,0];
+  a2_r = [0,0];
+  b2_r = [0,0];
+  a3_r = [0,0];
+  b3_r = [0,0];
 
   a1th = length(a1_r);
   a2th = length(a2_r);
@@ -83,12 +83,12 @@ function ret = rcmeter_3pfunc(n_t, V1_t, V2_t, V3_t, dV1dn_t, dV2dn_t, dV3dn_t, 
   b3th = length(b3_r);
   vars_num =  a1th + b1th + a2th + b2th + a3th + b3th;
 
-  figure(3);
+  #figure(3);
   errt = [];
   Irms = ErrorSquare(I_t, zeros(size(I_t)), n_t);
 
   Err0 = 0;
-  printf("idx errDiffRate\r\n");
+  #printf("idx errDiffRate\r\n");
   for epoch=1:1:EpochMax
     [G1_r, C1_r, dC1dn_r] = refreshValues(a1_r, b1_r, n_t);
     [G2_r, C2_r, dC2dn_r] = refreshValues(a2_r, b2_r, n_t);
@@ -99,21 +99,21 @@ function ret = rcmeter_3pfunc(n_t, V1_t, V2_t, V3_t, dV1dn_t, dV2dn_t, dV3dn_t, 
           Current(V3_t, dV3dn_t, G3_r, C3_r, dC3dn_r);
     Err = ErrorSquare(I_t, I_r, n_t);
     errt = [errt Err];
-    plot(errt, 'rx-');
-    drawnow;
+    #plot(errt, 'rx-');
+    #drawnow;
     errDiffRate = (Err0 - Err) / Err * 100;
-    printf("%d) %.3f\r\n",epoch, errDiffRate );
+    #printf("%d) %.3f\r\n",epoch, errDiffRate );
 
     if ( Err == 0 ) break; end
     if ( epoch > 1 && errDiffRate < 0.03 ) break; end
 
     if epoch > 2
       if(errt(epoch) == 0)
-        printf("Finish 1\r\n");
+        #printf("Finish 1\r\n");
         break;
       end
       if( abs( Err / Irms ) < EndErr )
-        printf("Finish 2\r\n");
+        #printf("Finish 2\r\n");
         break;
       end
     end
@@ -192,10 +192,10 @@ function ret = rcmeter_3pfunc(n_t, V1_t, V2_t, V3_t, dV1dn_t, dV2dn_t, dV3dn_t, 
     for p=1:1:b3th
       b3_r(p) += x_r(p+cursor)*solvRate;
     endfor
-    
+
     Err0 = Err;
   endfor
-  
+
   ret = struct(
           "G1", G1_r,
           "G2", G2_r,
@@ -209,6 +209,6 @@ function ret = rcmeter_3pfunc(n_t, V1_t, V2_t, V3_t, dV1dn_t, dV2dn_t, dV3dn_t, 
           "b1", b1_r,
           "b2", b2_r,
           "b3", b3_r,
-          "I", I_r 
-        );  
+          "I", I_r
+        );
 endfunction

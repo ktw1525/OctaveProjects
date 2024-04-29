@@ -22,7 +22,6 @@ dCdn = ac_t;
 
 I = V.*Gtrue + dVdn.*Ctrue + dCdn.*V;   # 측정 전류
 
-
 inputGraph = figure(1);
 subplot(4,1,1);
 plot(n,V);
@@ -36,7 +35,6 @@ title('Conductance (S)');
 subplot(4,1,4);
 plot(n, Ctrue);
 title('Capacitance (F)');
-
 
 # 입력 데이터
 # 1) 전압 V, dVdn

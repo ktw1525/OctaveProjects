@@ -11,13 +11,13 @@ function ret = test_3p()
       ret(i) += (2*rand() - 1)*rms*rate;
     endfor
   endfunction
-  
+
   function [g, c, dcdn] = refreshValues(a, b, x)
     g = polyFunc(a, x);
     c = polyFunc(b, x);
     dcdn = diff_polyFunc(b, x);
   endfunction
-  
+
   function ret = polyFunc(a, x)
     ret = 0;
     for m=1:1:length(x)
@@ -35,50 +35,58 @@ function ret = test_3p()
       endfor
     endfor
   endfunction
-  
+
   function ret = Current(v, dvdn, g, c, dcdn)
     ret = ( g + dcdn ) .* v + c .* dvdn;
   endfunction
-  
-  Cycl = 3;
-  Len = 24;
-  freq1 = 11;
-  freq2 = 13;
-  SamplingRate = Len/Cycl; # Samples per 1 cycle.
+
+  function ret = Avg(vals)
+    ret = 0;
+    len = length(vals);
+    for k=1:1:len
+      ret += vals(k)/len;
+    endfor
+  endfunction
+
+  Len = 50;
+  Period = 24;
+  Cycl = Len/Period;
   Vp = 220;
-  w = 2*pi*Cycl/Len;
+
+  w = 2*pi/Period;
 
   printf("SampleLength: %d\r\n", Len);
-  printf("SamplingRate: %d\r\n\r\n", SamplingRate);
+  printf("Sample Cycles: %d\r\n", Cycl);
+  printf("Period: %d\r\n\r\n", Period);
 
   n_t = 1:1:Len;
-  a1_t = [ 0.0002 0.002 ];
-  b1_t = [ 0.03 -0.002 ];
-  a2_t = [ 0.0001 0.001 ];
-  b2_t = [ 0.005 -0.001 ];
-  a3_t = [ 0.0003 0.004 ];
-  b3_t = [ 0.04 -0.002 ];
+  a1_t = [ 0.002*rand()-0.001 0.002*rand()-0.001 ];
+  b1_t = [ 0.002*rand()-0.001 0.002*rand()-0.001 ];
+  a2_t = [ 0.002*rand()-0.001 0.002*rand()-0.001 ];
+  b2_t = [ 0.002*rand()-0.001 0.002*rand()-0.001 ];
+  a3_t = [ 0.002*rand()-0.001 0.002*rand()-0.001 ];
+  b3_t = [ 0.002*rand()-0.001 0.002*rand()-0.001 ];
 
-  V1_t = Vp*sin(w*n_t) + Vp*0.01*sin(freq1*w*n_t);
-  V2_t = Vp*sin(w*n_t + 2*pi/3) + Vp*0.003*sin(freq2*w*n_t);
+  V1_t = Vp*sin(w*n_t);
+  V2_t = Vp*sin(w*n_t + 2*pi/3);
   V3_t = Vp*sin(w*n_t - 2*pi/3);
-  V1_t = addNoise(V1_t, 0.01);
-  V2_t = addNoise(V2_t, 0.01);
-  V3_t = addNoise(V3_t, 0.01);
+  V1_t = addNoise(V1_t, 0.1);
+  V2_t = addNoise(V2_t, 0.1);
+  V3_t = addNoise(V3_t, 0.1);
 
-  dV1dn_t = w*Vp*cos(w*n_t) + freq1*w*Vp*0.01*cos(freq1*w*n_t);
-  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3) + freq2*w*Vp*0.003*cos(freq2*w*n_t);
+  dV1dn_t = w*Vp*cos(w*n_t);
+  dV2dn_t = w*Vp*cos(w*n_t + 2*pi/3);
   dV3dn_t = w*Vp*cos(w*n_t - 2*pi/3);
-  dV1dn_t = addNoise(dV1dn_t, 0.01);
-  dV2dn_t = addNoise(dV2dn_t, 0.01);
-  dV3dn_t = addNoise(dV3dn_t, 0.01);
+  dV1dn_t = addNoise(dV1dn_t, 0.1);
+  dV2dn_t = addNoise(dV2dn_t, 0.1);
+  dV3dn_t = addNoise(dV3dn_t, 0.1);
 
   [G1_t, C1_t, dC1dn_t] = refreshValues(a1_t, b1_t, n_t);
   [G2_t, C2_t, dC2dn_t] = refreshValues(a2_t, b2_t, n_t);
   [G3_t, C3_t, dC3dn_t] = refreshValues(a3_t, b3_t, n_t);
   I_t = Current(V1_t(n_t), dV1dn_t(n_t), G1_t(n_t), C1_t(n_t), dC1dn_t(n_t)) +...
-       Current(V2_t(n_t), dV2dn_t(n_t), G2_t(n_t), C2_t(n_t), dC2dn_t(n_t)) +...
-       Current(V3_t(n_t), dV3dn_t(n_t), G3_t(n_t), C3_t(n_t), dC3dn_t(n_t));
+        Current(V2_t(n_t), dV2dn_t(n_t), G2_t(n_t), C2_t(n_t), dC2dn_t(n_t)) +...
+        Current(V3_t(n_t), dV3dn_t(n_t), G3_t(n_t), C3_t(n_t), dC3dn_t(n_t));
   I_t = addNoise(I_t, 0.01);
 
   inputGraph = figure(1);
@@ -107,61 +115,69 @@ function ret = test_3p()
   plot(n_t, C3_t, 'b');
   title('Capacitance (F)');
 
-  ret = rcmeter_3pfunc(n_t, V1_t, V2_t, V3_t, dV1dn_t, dV2dn_t, dV3dn_t, I_t);
-
-  G1_r = ret.G1;
-  G2_r = ret.G2;
-  G3_r = ret.G3;
-  C1_r = ret.C1;
-  C2_r = ret.C2;
-  C3_r = ret.C3;
-  a1_r = ret.a1;
-  a2_r = ret.a2;
-  a3_r = ret.a3;
-  b1_r = ret.b1;
-  b2_r = ret.b2;
-  b3_r = ret.b3;
-  I_r = ret.I;
-  
+  n_r = [];
+  G1_r = [];
+  G2_r = [];
+  G3_r = [];
+  C1_r = [];
+  C2_r = [];
+  C3_r = [];
   inputGraph = figure(2);
-  subplot(4,2,1);
-  plot(n_t, V1_t, 'r', n_t, V2_t, 'b',n_t, V3_t, 'g');
-  title('Voltage (V)');
-  subplot(4,2,2);
-  plot(n_t, I_t, 'bo', n_t, I_r, 'rx');
-  title('Current (A)');
-  subplot(4,2,3);
-  plot(n_t, G1_t, 'bo', n_t, G1_r, 'rx');
-  title('Conductance (S)');
-  subplot(4,2,5);
-  plot(n_t, G2_t, 'bo', n_t, G2_r, 'rx');
-  title('Conductance (S)');
-  subplot(4,2,7);
-  plot(n_t, G3_t, 'bo', n_t, G3_r, 'rx');
-  title('Conductance (S)');
-  subplot(4,2,4);
-  plot(n_t, C1_t, 'bo', n_t, C1_r, 'rx');
-  title('Capacitance (F)');
-  subplot(4,2,6);
-  plot(n_t, C2_t, 'bo', n_t, C2_r, 'rx');
-  title('Capacitance (F)');
-  subplot(4,2,8);
-  plot(n_t, C3_t, 'bo', n_t, C3_r, 'rx');
-  title('Capacitance (F)');
+  n_r0=1:1:Len-Period;
+  for i=n_r0
+    n_t0 = i:1:i+Period-1;
+    printf("idx: %d\r\n", i);
+    ret = rcmeter_3pfunc(1:1:Period, V1_t(n_t0), V2_t(n_t0), V3_t(n_t0), dV1dn_t(n_t0), dV2dn_t(n_t0), dV3dn_t(n_t0), I_t(n_t0));
+
+    n_r = [n_r; i+Period/2];
+    G1_r = [G1_r; Avg(ret.G1)];
+    G2_r = [G2_r; Avg(ret.G2)];
+    G3_r = [G3_r; Avg(ret.G3)];
+    C1_r = [C1_r; Avg(ret.C1)];
+    C2_r = [C2_r; Avg(ret.C2)];
+    C3_r = [C3_r; Avg(ret.C3)];
+
+    subplot(4,2,1);
+    plot(n_t, V1_t, 'r', n_t, V2_t, 'b',n_t, V3_t, 'g');
+    title('Voltage (V)');
+    subplot(4,2,2);
+    plot(n_t, I_t, 'b');
+    title('Current (A)');
+    subplot(4,2,3);
+    plot(n_t, G1_t, 'bo', n_r, G1_r, 'rx');
+    title('Conductance (S)');
+    subplot(4,2,5);
+    plot(n_t, G2_t, 'bo', n_r, G2_r, 'rx');
+    title('Conductance (S)');
+    subplot(4,2,7);
+    plot(n_t, G3_t, 'bo', n_r, G3_r, 'rx');
+    title('Conductance (S)');
+    subplot(4,2,4);
+    plot(n_t, C1_t, 'bo', n_r, C1_r, 'rx');
+    title('Capacitance (F)');
+    subplot(4,2,6);
+    plot(n_t, C2_t, 'bo', n_r, C2_r, 'rx');
+    title('Capacitance (F)');
+    subplot(4,2,8);
+    plot(n_t, C3_t, 'bo', n_r, C3_r, 'rx');
+    title('Capacitance (F)');
+    drawnow;
+  endfor
 
   printf("\r\nTrue Values\r\n");
-  printf("G1 = %s\r\n",polyout(flip(a1_t), 'n'));
-  printf("C1 = %s\r\n",polyout(flip(b1_t), 'n'));
-  printf("G2 = %s\r\n",polyout(flip(a2_t), 'n'));
-  printf("C2 = %s\r\n",polyout(flip(b2_t), 'n'));
-  printf("G3 = %s\r\n",polyout(flip(a3_t), 'n'));
-  printf("C3 = %s\r\n",polyout(flip(b3_t), 'n'));
+  printf("G1 = %f\r\n",Avg(G1_t));
+  printf("C1 = %f\r\n",Avg(G2_t));
+  printf("G2 = %f\r\n",Avg(G3_t));
+  printf("C2 = %f\r\n",Avg(C1_t));
+  printf("G3 = %f\r\n",Avg(C2_t));
+  printf("C3 = %f\r\n",Avg(C3_t));
 
   printf("\r\nEstimated Values\r\n");
-  printf("G1 = %s\r\n",polyout(flip(a1_r), 'n'));
-  printf("C1 = %s\r\n",polyout(flip(b1_r), 'n'));
-  printf("G2 = %s\r\n",polyout(flip(a2_r), 'n'));
-  printf("C2 = %s\r\n",polyout(flip(b2_r), 'n'));
-  printf("G3 = %s\r\n",polyout(flip(a3_r), 'n'));
-  printf("C3 = %s\r\n",polyout(flip(b3_r), 'n'));
+  printf("G1 = %f\r\n",Avg(G1_r));
+  printf("C1 = %f\r\n",Avg(G2_r));
+  printf("G2 = %f\r\n",Avg(G3_r));
+  printf("C2 = %f\r\n",Avg(C1_r));
+  printf("G3 = %f\r\n",Avg(C2_r));
+  printf("C3 = %f\r\n",Avg(C3_r));
+
 endfunction
