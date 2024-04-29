@@ -1,4 +1,5 @@
 function ret = rcmeter_3p()
+  function ret = addNoise(sig, rate)
     len = length(sig);
     ret = sig;
     rms = 0;
