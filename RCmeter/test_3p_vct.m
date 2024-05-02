@@ -23,5 +23,4 @@ printf("C3 = %f\r\n",input.C3(1));
 
 printf("\r\nEstimated Values\r\n");
 ret = rcmeter_vct(input.n, Period, input.V1, input.V2, input.V3, input.dV1dn, input.dV2dn, input.dV3dn, input.I);
-
-printf("\r\nDeepLearning Start\r\n");
+ret
