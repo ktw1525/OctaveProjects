@@ -1,7 +1,5 @@
 # Preprocess
 
-# 주파수별 미분 데이터 위상이득 조정 필요 함
-
 Vr_sample = V_t_r(2:2:length(V_t_r));
 [AVr5,BVr5] = separateFreq(n5,Vr_sample,stepNumber/2);
 [AVr7,BVr7] = separateFreq(n7,Vr_sample,stepNumber/2);
