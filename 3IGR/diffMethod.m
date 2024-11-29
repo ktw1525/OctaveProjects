@@ -8,9 +8,10 @@ t = 0:t_step:t_end;
 w = 2*pi*f;
 
 V = 220*sqrt(2)*sin(w*t);
-G = 1/1000; % + 1/5000 * sin(w/6*t);
-C = 10*10^-6; % - 9*10^-6 * cos(w/2*t);
-dVdt = [0, diff(V)/t_step];
+G = 1/1000 + 1/5000 * sin(w/6*t);
+C = 10*10^-6 - 9*10^-6 * cos(w/2*t);
+dCdt = [diff(C)/t_step, 0];
+dVdt = [diff(V)/t_step, 0];
 I = V.*G + C.*dVdt;
 
 % V1은 전압신호 V에 필터1을적용
@@ -35,9 +36,10 @@ plot(t, V1, 'r', t, V2, 'b');
 subplot(4,1,2);
 plot(t, I1, 'r', t, I2, 'b');
 
-Gr = [1/1000,1/1000];
-Cr = [10*10^-6,10*10^-6];
-for i=2:1:totalSamples
+Gr = [];
+Cr = [];
+idx = 2:1:totalSamples;
+for i=idx
   Y = [I1(i); I2(i);];
   M = [ V1(i), dVdt1(i); V2(i), dVdt2(i); ];
   B = [];
@@ -47,6 +49,6 @@ for i=2:1:totalSamples
 endfor
 
 subplot(4,1,3);
-plot(t, G, 'g', t, Gr, 'b:');
+plot(t, G, 'g', t(idx), Gr, 'bx');
 subplot(4,1,4);
-plot(t, C, 'g', t, Cr, 'b:');
+plot(t, C, 'g', t(idx), Cr, 'bx');
