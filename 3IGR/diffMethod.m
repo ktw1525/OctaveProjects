@@ -7,22 +7,27 @@ t_end = 1/f*periods;
 t = 0:t_step:t_end;
 w = 2*pi*f;
 
-V = 22*sqrt(2)*sin(w*t) + 10*rand(1,length(t));
-G = 1/1000 + 1/5000 * sin(w/6*t);
-C = 10*10^-6 - 9*10^-6 * cos(w/2*t);
-dCdt = [0, diff(C)/t_step];
-
+V = 220*sqrt(2)*sin(w*t);
+G = 1/1000; % + 1/5000 * sin(w/6*t);
+C = 10*10^-6; % - 9*10^-6 * cos(w/2*t);
+dVdt = [0, diff(V)/t_step];
+I = V.*G + C.*dVdt;
 
 % V1은 전압신호 V에 필터1을적용
 % V2은 전압신호 V에 필터2을적용
 % I1은 전류신호 I에 필터1을적용
 % I2은 전류신호 I에 필터2을적용
-V1 = applyRCFilter(V, t_step, 10000, 10*10^-6);
-V2 = applyRCFilter(V, t_step, 50000, 3*10^-6);
+FilterR1 = 10;
+FilterC1 = 220*10^-6;
+FilterR2 = 1000;
+FilterC2 = 2.2*10^-12;
+
+V1 = applyRCFilter(V, t_step, FilterR1, FilterC1);
+V2 = applyRCFilter(V, t_step, FilterR2, FilterC2);
 dVdt1 = [0, diff(V1)/t_step];
 dVdt2 = [0, diff(V2)/t_step];
-I1 = V1.*G + C.*dVdt1
-I2 = V2.*G + C.*dVdt2
+I1 = applyRCFilter(I, t_step, FilterR1, FilterC1);
+I2 = applyRCFilter(I, t_step, FilterR2, FilterC2);
 
 figure(1);
 subplot(4,1,1);
@@ -35,6 +40,7 @@ Cr = [10*10^-6,10*10^-6];
 for i=2:1:totalSamples
   Y = [I1(i); I2(i);];
   M = [ V1(i), dVdt1(i); V2(i), dVdt2(i); ];
+  B = [];
   X = inv(M)*Y
   Gr = [Gr, X(1)];
   Cr = [Cr, X(2)];
