@@ -22,6 +22,6 @@ function filtered_signal = applyRCFilter(signal, dt, R, C)
   
   % 필터 적용 (재귀 방식)
   for i = 2:length(signal)
-    filtered_signal(i) =  * signal(i) + (1 - alpha) * filtered_signal(i-1);
+    filtered_signal(i) = alpha * signal(i) + (1 - alpha) * filtered_signal(i-1);
   end
 end
