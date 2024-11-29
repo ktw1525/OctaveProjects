@@ -1,63 +1,46 @@
-
-
-
 f = 60;
-samples = 200;
+samples = 100;
 t_step = 1/f/samples;
-t_end = 1/f*5;
+periods = 5;
+totalSamples = samples*periods;
+t_end = 1/f*periods;
 t = 0:t_step:t_end;
 w = 2*pi*f;
 
-R = 100000 + 50000 * sin(w/2*t);
+G = 1/1000 + 1/5000 * sin(w/6*t);
 C = 10*10^-6 - 9*10^-6 * cos(w/2*t);
-dCdt = [0,diff(C)];
+dCdt = [0, diff(C)/t_step];
 
-V = 220*sqrt(2)*sin(w*t);
-dVdt = [0,diff(V)];
 
-I = V./R + C.*dVdt + dCdt.* V;
-% I = V * (G + dCdt) + C * dVdt;
+% V1은 전압신호 V에 필터1을적용
+% V2은 전압신호 V에 필터2을적용
+% I1은 전류신호 I에 필터1을적용
+% I2은 전류신호 I에 필터2을적용
+
+V1 = 22*sqrt(2)*sin(w*t) + 10*rand(1,length(t));
+V2 = 21*sqrt(2)*sin(w*t) + 22*rand(1,length(t));
+dVdt1 = [0, diff(V1)/t_step];
+dVdt2 = [0, diff(V2)/t_step];
+I1 = V1.*G + C.*dVdt1
+I2 = V2.*G + C.*dVdt2
 
 figure(1);
 subplot(4,1,1);
-plot(t, V);
+plot(t, V1, 'r', t, V2, 'b');
 subplot(4,1,2);
-plot(t, I);
+plot(t, I1, 'r', t, I2, 'b');
+
+Gr = [1/1000,1/1000];
+Cr = [10*10^-6,10*10^-6];
+for i=2:1:totalSamples
+  Y = [I1(i); I2(i);];
+  M = [ V1(i), dVdt1(i); V2(i), dVdt2(i); ];
+  X = inv(M)*Y
+  Gr = [Gr, X(1)];
+  Cr = [Cr, X(2)];
+endfor
+
 subplot(4,1,3);
-plot(t, R)
+plot(t, G, 'g', t, Gr, 'b:');
 subplot(4,1,4);
-plot(t, C)
-
-pad = 5;
-picker0 = 100-pad:101-pad;
-picker1 = 100:101;
-picker2 = 100+pad:101+pad;
-
-Rr = R(picker1)
-Cr = C(picker1)
-
-Y = I(picker0);
-M = [V(picker0); dVdt(picker0)];
-X = Y*inv(M);
-Rr0 = 1/X(1)
-Cr0 = X(2)
-
-
-Y = I(picker1);
-M = [V(picker1); dVdt(picker1)];
-X = Y*inv(M);
-Rr1 = 1/X(1)
-Cr1 = X(2)
-
-Y = I(picker2);
-M = [V(picker2); dVdt(picker2)];
-X = Y*inv(M);
-Rr2 = 1/X(1)
-Cr2 = X(2)
-
-
-dCr1dt = (Cr2 - Cr0)/(picker2(1) - picker0(1));
-Rr1 = 1/(1/Rr1 - dCr1dt)
-
-
-
+plot(t, C, 'g', t, Cr, 'b:');
