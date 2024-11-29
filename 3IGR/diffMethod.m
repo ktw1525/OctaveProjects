@@ -7,6 +7,7 @@ t_end = 1/f*periods;
 t = 0:t_step:t_end;
 w = 2*pi*f;
 
+V = 22*sqrt(2)*sin(w*t) + 10*rand(1,length(t));
 G = 1/1000 + 1/5000 * sin(w/6*t);
 C = 10*10^-6 - 9*10^-6 * cos(w/2*t);
 dCdt = [0, diff(C)/t_step];
@@ -16,9 +17,8 @@ dCdt = [0, diff(C)/t_step];
 % V2은 전압신호 V에 필터2을적용
 % I1은 전류신호 I에 필터1을적용
 % I2은 전류신호 I에 필터2을적용
-
-V1 = 22*sqrt(2)*sin(w*t) + 10*rand(1,length(t));
-V2 = 21*sqrt(2)*sin(w*t) + 22*rand(1,length(t));
+V1 = applyRCFilter(V, t_step, 10000, 10*10^-6);
+V2 = applyRCFilter(V, t_step, 50000, 3*10^-6);
 dVdt1 = [0, diff(V1)/t_step];
 dVdt2 = [0, diff(V2)/t_step];
 I1 = V1.*G + C.*dVdt1
