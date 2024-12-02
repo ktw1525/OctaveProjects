@@ -8,8 +8,8 @@ t = 0:t_step:t_end;
 w = 2*pi*f;
 
 V = 220*sqrt(2)*sin(w*t);
-G = 1/1000; % + 1/5000 * sin(w/6*t);
-C = 10*10^-6; % - 9*10^-6 * cos(w/2*t);
+G = 1/1000 + 1/5000 * sin(w/6*t);
+C = 10*10^-6 - 9*10^-6 * cos(w/2*t);
 dVdt = [0, diff(V)/t_step];
 I = V.*G + C.*dVdt;
 
@@ -19,7 +19,6 @@ I = V.*G + C.*dVdt;
 % I2은 전류신호 I에 필터2을적용
 FilterR1 = 10;
 FilterC1 = 220*10^-6;
-FilterR2 = 1000;
 FilterC2 = 2.2*10^-12;
 
 V1 = applyRCFilter(V, t_step, FilterR1, FilterC1);
