@@ -18,6 +18,7 @@ I = V.*G + C.*dVdt;
 % I1은 전류신호 I에 필터1을적용
 % I2은 전류신호 I에 필터2을적용
 FilterR1 = 10;
+FilterR2 = 1000;
 FilterC1 = 220*10^-6;
 FilterC2 = 2.2*10^-12;
 
