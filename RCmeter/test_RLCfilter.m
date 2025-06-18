@@ -4,7 +4,7 @@ clc
 
 fc = 60.155;
 wc = 2*pi*fc;
-R = 10;
+R = 1000;
 BW = 7.958*4;
 Q = fc / BW;
 L = Q / wc * R
@@ -34,7 +34,7 @@ Zi = R + i*Xi;
 Ii = abs(Vamp/Zi);
 Vouti = Vamp-Ii*R
 
-V = Vamp*sin(wi*t);% + Vamp*sin(wi/10*t) + Vamp/10*sin(wi*10*t);
+V = Vamp*sin(wi*t) + Vamp*sin(wi/10*t);% + Vamp/10*sin(wi*10*t);
 
 filter = struct();
 filter.dt = dt;
